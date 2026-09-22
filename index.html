@@ -14,6 +14,7 @@
     --accent:#2f6fed;
     --side-w:clamp(120px, 22vw, 280px);
     --gap:9px;
+    --cols:4; /* <- quantas colunas de imagem por linha. Aumente este número para deixar as imagens menores, diminua para deixá-las maiores. */
   }
 
   *{box-sizing:border-box;}
@@ -98,7 +99,7 @@
   main{
     flex:1;
     min-width:0;
-    padding:clamp(40px, 6vw, 80px) clamp(16px, 9vw, 130px) clamp(60px, 10vw, 140px) clamp(16px, 7vw, 88px);
+    padding:clamp(40px, 6vw, 80px) clamp(16px, 12vw, 240px) clamp(60px, 10vw, 140px) clamp(16px, 13vw, 280px);
   }
 
   h1.page-title{
@@ -109,9 +110,15 @@
     margin:0 0 72px 0;
   }
 
+  .content-col{
+    /* o grid preenche toda a largura disponível aqui dentro; as margens
+       esquerda/direita são controladas só pelo padding do <main> abaixo,
+       de forma independente uma da outra. */
+  }
+
   .grid{
     display:grid;
-    grid-template-columns:repeat(4, 1fr);
+    grid-template-columns:repeat(var(--cols), 1fr);
     gap:var(--gap);
   }
 
@@ -255,8 +262,10 @@
   </aside>
 
   <main>
-    <h1 class="page-title">ARTWORKS</h1>
-    <div class="grid" id="grid"></div>
+    <div class="content-col">
+      <h1 class="page-title">ARTWORKS</h1>
+      <div class="grid" id="grid"></div>
+    </div>
     <footer class="credit">Edite o array "artworks" no final do HTML para trocar as imagens.</footer>
   </main>
 
@@ -328,4 +337,6 @@ artworks.forEach((art, i)=>{
 </script>
 
 </body>
+</html>
+
 </html>
