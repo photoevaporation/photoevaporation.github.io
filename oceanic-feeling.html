@@ -379,21 +379,20 @@ footer.credit{
    ajusta sozinho. Enquanto "url" estiver vazia (""), aparece um
    gradiente de cor no lugar, só pra não ficar em branco.
 
-   "ratio" indica se a imagem é quadrada, retrato ou paisagem, pra
-   decidir quantas "células" do mosaico ela vai ocupar (ver MÓDULO 11):
-     próximo de "1/1"                         → 1 célula (quadrado)
-     mais alta que larga (ex: "3/4", "4/5")   → 2 células na vertical
-     mais larga que alta (ex: "4/3", "16/9")  → 2 células na horizontal
+   "ratio" é OPCIONAL. Quando a imagem tem "url", a proporção é
+   detectada automaticamente a partir do arquivo real assim que ele
+   carrega — não precisa preencher "ratio" nesse caso. Só use "ratio"
+   se quiser forçar um valor manualmente, ou pra itens sem "url" ainda.
    ========================================================================== */
 const projectImages = [
-  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif", ratio: "1/1"  },
-  { title: "oceanic feeling 02", url: "oceanic_feeling/oceanic_feeling_b.gif", ratio: "3/4"  },
-  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_c.gif", ratio: "4/3"  },
-  { title: "oceanic feeling 04", url: "oceanic_feeling/oceanic_feeling_d.gif", ratio: "4/5"  },
-  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_e.gif", ratio: "3/4"  },
-  { title: "oceanic feeling 06", url: "oceanic_feeling/oceanic_feeling_f.gif", ratio: "16/9" },
-  { title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_g.gif", ratio: "1/1"  },
-  { title: "oceanic feeling 08", url: "oceanic_feeling/oceanic_feeling_h.gif", ratio: "4/5"  },
+  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif" },
+  { title: "oceanic feeling 02", url: "oceanic_feeling/oceanic_feeling_b.gif" },
+  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_c.gif" },
+  { title: "oceanic feeling 04", url: "oceanic_feeling/oceanic_feeling_d.gif" },
+  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_e.gif" },
+  { title: "oceanic feeling 06", url: "oceanic_feeling/oceanic_feeling_f.gif" },
+  { title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_a.gif" },
+  { title: "oceanic feeling 08", url: "oceanic_feeling/oceanic_feeling_a.gif" },
 ];
 
 /* Cores de fallback (usadas somente quando "url" está vazia acima). */
@@ -408,29 +407,36 @@ const fallbackPalettes = [
   ['#100a1a','#8a6bd6'],
 ];
 
-/* Proporção usada quando um item não define "ratio". */
+/* Proporção usada quando um item não tem "url" nem "ratio" definidos. */
 const DEFAULT_RATIO = "3/4";
 
 
 /* ==========================================================================
-   MÓDULO 11 — RENDERIZAÇÃO DO GRID (mosaico)
+   MÓDULO 11 — RENDERIZAÇÃO DO GRID (mosaico, com detecção automática)
    --------------------------------------------------------------------------
-   Mesma lógica do index.html: getSpanFromRatio() decide o tamanho de
-   cada imagem no mosaico (1 ou 2 células), e sizeMosaicCells() calcula
-   o tamanho real da célula em pixels, recalculando a cada redimensionamento
-   da janela. Normalmente não precisa mexer aqui — só no MÓDULO 10.
+   Mesma lógica do index.html: quando a imagem tem "url", a proporção é
+   lida do próprio arquivo (naturalWidth/naturalHeight) assim que ele
+   carrega, e o quadro é reencaixado no mosaico automaticamente.
+   sizeMosaicCells() calcula o tamanho real da célula em pixels,
+   recalculando a cada redimensionamento da janela. Normalmente não
+   precisa mexer aqui — só no MÓDULO 10.
    ========================================================================== */
 
-function ratioToNumber(ratioStr){
+function ratioStringToNumber(ratioStr){
   const [w, h] = String(ratioStr).split('/').map(Number);
   return (w && h) ? (w / h) : 1;
 }
 
-function getSpanFromRatio(ratioStr){
-  const r = ratioToNumber(ratioStr);
+function getSpanFromRatioNumber(r){
   if (r > 1.2)  return { col: 2, row: 1 };  // paisagem
   if (r < 0.85) return { col: 1, row: 2 };  // retrato
   return { col: 1, row: 1 };                 // quadrada
+}
+
+function applySpan(tile, ratioNumber){
+  const span = getSpanFromRatioNumber(ratioNumber);
+  tile.style.gridColumn = `span ${span.col}`;
+  tile.style.gridRow = `span ${span.row}`;
 }
 
 function sizeMosaicCells(){
@@ -450,15 +456,24 @@ function sizeMosaicCells(){
     const tile = document.createElement('div');
     tile.className = 'tile';
 
-    const span = getSpanFromRatio(art.ratio || DEFAULT_RATIO);
-    tile.style.gridColumn = `span ${span.col}`;
-    tile.style.gridRow = `span ${span.row}`;
+    const manualRatio = art.ratio ? ratioStringToNumber(art.ratio) : null;
+    applySpan(tile, manualRatio ?? ratioStringToNumber(DEFAULT_RATIO));
 
     if (art.url) {
       const img = document.createElement('img');
-      img.src = art.url;
       img.alt = art.title;
       img.loading = 'lazy';
+
+      // Detecção automática: só roda se "ratio" NÃO foi definido à mão.
+      if (manualRatio === null){
+        img.addEventListener('load', () => {
+          if (img.naturalWidth && img.naturalHeight){
+            applySpan(tile, img.naturalWidth / img.naturalHeight);
+          }
+        });
+      }
+
+      img.src = art.url;   // definir o src por último dispara o carregamento
       tile.appendChild(img);
     } else {
       const [corInicial, corFinal] = fallbackPalettes[i % fallbackPalettes.length];
