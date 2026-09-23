@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>felipe lins — about</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ==========================================================================
+   MÓDULO 1 — CONFIGURAÇÃO GERAL (variáveis)
+   --------------------------------------------------------------------------
+   Iguais às do index.html, pra manter o menu lateral idêntico nas duas
+   páginas. Se mudar aqui, lembre de mudar no index.html também (ou nas
+   duas páginas do site, se tiver mais).
+   ========================================================================== */
+:root{
+  --bg:#ffffff;
+  --ink:#111111;
+  --muted:#8a8a8a;
+  --muted-2:#b3b3b3;
+  --line:#ececec;
+  --accent:#2f6fed;
+
+  --side-w:clamp(90px, 18vw, 340px);
+
+  /* Nesta página não tem grid de imagens (--gap/--cols não são usados
+     aqui), mas mantemos as mesmas variáveis por consistência com o
+     restante do site. */
+  --gap:9px;
+  --cols:4;
+}
+
+
+/* ==========================================================================
+   MÓDULO 2 — RESET / BASE
+   ========================================================================== */
+*{
+  box-sizing:border-box;
+}
+html, body{
+  height:100%;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Montserrat", "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+
+/* ==========================================================================
+   MÓDULO 3 — ESTRUTURA GERAL DA PÁGINA
+   ========================================================================== */
+.layout{
+  display:flex;
+  max-width:1920px;
+  margin:0 auto;
+  align-items:flex-start;
+}
+
+
+/* ==========================================================================
+   MÓDULO 4 — MENU LATERAL (sidebar)
+   --------------------------------------------------------------------------
+   IDÊNTICO ao do index.html — copiado aqui porque cada página HTML é um
+   arquivo independente (sem "includes" de verdade em um site estático
+   simples como este). Se editar o menu num arquivo, repita no outro.
+   ========================================================================== */
+aside{
+  width:var(--side-w);
+  flex:0 0 var(--side-w);
+  padding:clamp(16px, 6vw, 72px) clamp(8px, 2vw, 24px) clamp(16px, 6vw, 72px) clamp(10px, 8.5vw, 160px);
+  position:sticky;
+  top:0;
+  align-self:flex-start;
+}
+
+.brand{
+  display:block;
+  font-size:19px;
+  font-weight:400;
+  letter-spacing:0.2px;
+  margin:0 0 60px 0;
+  color:var(--ink);
+}
+
+nav.top-links{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  margin-bottom:48px;
+}
+nav.top-links a{
+  font-size:14px;
+  color:#555;
+  transition:color .15s ease;
+}
+nav.top-links a:hover{
+  color:var(--ink);
+}
+/* Link do item de menu correspondente à página atual (ver .active no HTML) */
+nav.top-links a.active{
+  color:var(--ink);
+}
+
+.section-label{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:26px;
+}
+
+.projects{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+.projects a{
+  font-size:14px;
+  color:#7a7a7a;
+  line-height:1.3;
+  transition:color .15s ease;
+  width:fit-content;
+}
+.projects a:hover{
+  color:var(--ink);
+}
+.projects a.active{
+  color:var(--ink);
+}
+
+
+/* ==========================================================================
+   MÓDULO 5 — CONTEÚDO PRINCIPAL (main)
+   --------------------------------------------------------------------------
+   Mesmo comportamento do index.html: as margens esquerda/direita do
+   conteúdo são independentes uma da outra, controladas pelo padding
+   do <main>.
+   ========================================================================== */
+main{
+  flex:1;
+  min-width:0;
+  padding:clamp(20px, 6vw, 80px) clamp(8px, 12vw, 240px) clamp(30px, 10vw, 140px) clamp(8px, 13vw, 280px);
+}
+
+/* Título "ABOUT" — mesmo estilo do título "ARTWORKS" no index.html */
+h1.page-title{
+  text-align:center;
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:1px;
+  margin:0 0 72px 0;
+}
+
+
+/* ==========================================================================
+   MÓDULO 6 — CONTEÚDO DA PÁGINA "ABOUT" (texto + imagem)
+   --------------------------------------------------------------------------
+   Duas colunas lado a lado: texto biográfico à esquerda, uma imagem em
+   destaque à direita. Em telas estreitas, empilha (texto em cima, imagem
+   embaixo) — ver MÓDULO 8 (responsividade).
+   ========================================================================== */
+.about-content{
+  display:flex;
+  align-items:flex-start;
+  gap:clamp(24px, 6vw, 110px);   /* espaço entre o texto e a imagem */
+}
+
+/* Coluna de texto */
+.about-text{
+  flex:1 1 0;
+  max-width:620px;         /* evita que o texto fique numa linha longa demais em telas largas */
+  padding-top:6px;
+}
+.about-text p{
+  margin:0;
+  font-size:15px;
+  line-height:1.75;
+  color:#555;
+}
+.about-text p + p{
+  margin-top:1.4em;        /* espaço entre parágrafos, caso adicione mais de um */
+}
+
+/* Coluna da imagem */
+.about-image{
+  flex:0 0 clamp(220px, 32vw, 420px);  /* largura da imagem — encolhe suavemente também */
+  aspect-ratio:1 / 0.92;               /* praticamente quadrada, como no print original */
+  border-radius:2px;
+  overflow:hidden;
+  background:#0a0a0a;   /* aparece brevemente enquanto a imagem carrega, ou se "url" ficar vazia */
+}
+.about-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+
+/* ==========================================================================
+   MÓDULO 7 — ELEMENTOS FLUTUANTES + RODAPÉ
+   ========================================================================== */
+.to-top{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  width:44px; height:44px;
+  border-radius:50%;
+  background:#f2f2f2;
+  display:flex; align-items:center; justify-content:center;
+  color:#444;
+  font-size:18px;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+footer.credit{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted-2);
+  padding:40px 0 20px;
+}
+
+
+/* ==========================================================================
+   MÓDULO 8 — RESPONSIVIDADE (telas menores)
+   --------------------------------------------------------------------------
+   Mesma lógica de prioridade do index.html: o menu cede espaço primeiro
+   (já é fluido via clamp() nos módulos 4 e 5). Aqui só cuidamos de
+   empilhar texto + imagem quando não cabem mais lado a lado.
+   ========================================================================== */
+@media (max-width: 640px){
+  .layout{
+    flex-direction:column;
+  }
+  aside{
+    position:relative;
+    width:100%;
+    flex-basis:auto;
+    padding:16px 16px 12px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:16px;
+  }
+  .brand{ margin:0 16px 0 0; }
+  nav.top-links{
+    flex-direction:row;
+    margin-bottom:0;
+    gap:16px;
+  }
+  .section-label{ display:none; }
+  .projects{ display:none; }
+  main{ padding:20px 10px 40px; }
+}
+
+/* Abaixo de 780px, texto e imagem empilham (imagem embaixo do texto)
+   em vez de ficarem espremidos lado a lado. */
+@media (max-width: 780px){
+  .about-content{
+    flex-direction:column;
+  }
+  .about-image{
+    flex-basis:auto;
+    width:100%;
+    max-width:420px;
+  }
+}
+
+@media (max-width: 420px){
+  h1.page-title{ font-size:18px; margin-bottom:32px; letter-spacing:0.5px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- MÓDULO 4 — Menu lateral (igual ao index.html, com "About" marcado como ativo) -->
+  <aside>
+    <a class="brand" href="index.html">felipe lins</a>
+
+    <nav class="top-links">
+      <a href="about.html" class="active">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="section-label">Projects</div>
+    <nav class="projects" id="projects-nav">
+      <a href="index.html">organic loops</a>
+      <a href="index.html">neural automatas</a>
+      <a href="index.html">magic spells</a>
+      <a href="index.html">cracks</a>
+      <a href="index.html">synthetic sea</a>
+      <a href="index.html">sublimation</a>
+      <a href="index.html">rgb melter</a>
+      <a href="index.html">overflow</a>
+      <a href="index.html">tiny worlds</a>
+      <a href="index.html">liquefy</a>
+      <a href="index.html">circulation</a>
+      <a href="index.html">fluid box</a>
+      <a href="index.html">cosmic dew</a>
+      <a href="index.html">dreaming</a>
+      <a href="oceanic-feeling.html">oceanic feeling</a>
+      <a href="index.html">others</a>
+    </nav>
+  </aside>
+
+  <!-- MÓDULO 5 e 6 — Conteúdo principal: título + texto/imagem -->
+  <main>
+    <h1 class="page-title">ABOUT</h1>
+
+    <div class="about-content">
+      <div class="about-text">
+        <!-- ======================================================
+             EDITE O TEXTO DA BIO AQUI (é HTML puro, sem JavaScript).
+             Pode adicionar mais parágrafos <p>...</p> à vontade.
+             ====================================================== -->
+        <p>
+          Felipe Lins (1993) is a visual artist and creative coder.
+          Write your bio here — background, education, exhibitions,
+          influences, whatever fits the artist statement.
+        </p>
+      </div>
+
+      <div class="about-image" id="about-image">
+        <!-- preenchido via JavaScript logo abaixo (MÓDULO 9) -->
+      </div>
+    </div>
+
+    <footer class="credit">Edite o texto e a URL da imagem no &lt;script&gt; / HTML desta página.</footer>
+  </main>
+
+</div>
+
+<div class="to-top" title="voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</div>
+
+
+<script>
+/* ==========================================================================
+   MÓDULO 9 — IMAGEM DE DESTAQUE DESTA PÁGINA
+   --------------------------------------------------------------------------
+   Troque o valor de "url" pela URL direta da sua imagem (.jpg/.png/.webp).
+   Enquanto estiver vazia (""), aparece um gradiente de cor no lugar.
+   ========================================================================== */
+const aboutImage = {
+  url: "",
+  alt: "felipe lins — retrato ou obra em destaque"
+};
+
+(function renderAboutImage(){
+  const holder = document.getElementById('about-image');
+
+  if (aboutImage.url) {
+    const img = document.createElement('img');
+    img.src = aboutImage.url;
+    img.alt = aboutImage.alt;
+    img.loading = 'lazy';
+    holder.appendChild(img);
+  } else {
+    holder.style.background = 'linear-gradient(155deg, #210a12, #e64fa0)';
+  }
+})();
+</script>
+
+</body>
+</html>
