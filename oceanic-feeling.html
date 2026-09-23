@@ -190,20 +190,24 @@ h1.page-title{
 
 
 /* ==========================================================================
-   MÓDULO 7 — GRID DE IMAGENS DO PROJETO
+   MÓDULO 7 — GRID DE IMAGENS DO PROJETO (mosaico)
    --------------------------------------------------------------------------
-   Exatamente igual ao grid do index.html: preenche 100% do espaço entre
-   as margens do módulo 5, sempre em --cols colunas (4, fixo).
+   Igual ao mosaico do index.html: existe uma "célula" quadrada de base,
+   e cada imagem ocupa 1 ou 2 células dependendo se é quadrada, retrato
+   ou paisagem (ver MÓDULO 11 lá embaixo, getSpanFromRatio). O tamanho
+   da célula é calculado via JavaScript, não fixado aqui no CSS.
    ========================================================================== */
 .grid{
   display:grid;
   grid-template-columns:repeat(var(--cols), 1fr);
+  grid-auto-flow:dense;   /* preenche buracos deixados por imagens grandes */
   gap:var(--gap);
 }
 
+/* O tamanho de cada .tile vem do grid-column/grid-row aplicado via
+   JavaScript (span 1 ou 2 células) — por isso sem aspect-ratio fixo. */
 .tile{
   position:relative;
-  aspect-ratio:4/7;
   border-radius:2px;
   overflow:hidden;
   cursor:pointer;
@@ -374,16 +378,22 @@ footer.credit{
    imagem. Adicione, remova ou reordene itens à vontade — o grid se
    ajusta sozinho. Enquanto "url" estiver vazia (""), aparece um
    gradiente de cor no lugar, só pra não ficar em branco.
+
+   "ratio" indica se a imagem é quadrada, retrato ou paisagem, pra
+   decidir quantas "células" do mosaico ela vai ocupar (ver MÓDULO 11):
+     próximo de "1/1"                         → 1 célula (quadrado)
+     mais alta que larga (ex: "3/4", "4/5")   → 2 células na vertical
+     mais larga que alta (ex: "4/3", "16/9")  → 2 células na horizontal
    ========================================================================== */
 const projectImages = [
-  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif" },
-  { title: "oceanic feeling 02", url: "oceanic_feeling/oceanic_feeling_b.gif" },
-  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_c.gif" },
-  { title: "oceanic feeling 04", url: "oceanic_feeling/oceanic_feeling_d.gif" },
-  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_e.gif" },
-  { title: "oceanic feeling 06", url: "oceanic_feeling/oceanic_feeling_f.gif" },
-  //{ title: "oceanic feeling 07", url: "" },
-  //{ title: "oceanic feeling 08", url: "" },
+  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif", ratio: "1/1"  },
+  { title: "oceanic feeling 02", url: "oceanic_feeling/oceanic_feeling_b.gif", ratio: "3/4"  },
+  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_c.gif", ratio: "4/3"  },
+  { title: "oceanic feeling 04", url: "oceanic_feeling/oceanic_feeling_d.gif", ratio: "4/5"  },
+  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_e.gif", ratio: "3/4"  },
+  { title: "oceanic feeling 06", url: "oceanic_feeling/oceanic_feeling_f.gif", ratio: "16/9" },
+  { title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_g.gif", ratio: "1/1"  },
+  { title: "oceanic feeling 08", url: "oceanic_feeling/oceanic_feeling_h.gif", ratio: "4/5"  },
 ];
 
 /* Cores de fallback (usadas somente quando "url" está vazia acima). */
@@ -398,19 +408,51 @@ const fallbackPalettes = [
   ['#100a1a','#8a6bd6'],
 ];
 
+/* Proporção usada quando um item não define "ratio". */
+const DEFAULT_RATIO = "3/4";
+
 
 /* ==========================================================================
-   MÓDULO 11 — RENDERIZAÇÃO DO GRID
+   MÓDULO 11 — RENDERIZAÇÃO DO GRID (mosaico)
    --------------------------------------------------------------------------
-   Lê "projectImages" acima e monta um quadro (.tile) para cada item.
-   Normalmente não precisa mexer aqui — só no MÓDULO 10.
+   Mesma lógica do index.html: getSpanFromRatio() decide o tamanho de
+   cada imagem no mosaico (1 ou 2 células), e sizeMosaicCells() calcula
+   o tamanho real da célula em pixels, recalculando a cada redimensionamento
+   da janela. Normalmente não precisa mexer aqui — só no MÓDULO 10.
    ========================================================================== */
+
+function ratioToNumber(ratioStr){
+  const [w, h] = String(ratioStr).split('/').map(Number);
+  return (w && h) ? (w / h) : 1;
+}
+
+function getSpanFromRatio(ratioStr){
+  const r = ratioToNumber(ratioStr);
+  if (r > 1.2)  return { col: 2, row: 1 };  // paisagem
+  if (r < 0.85) return { col: 1, row: 2 };  // retrato
+  return { col: 1, row: 1 };                 // quadrada
+}
+
+function sizeMosaicCells(){
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+  const cols = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
+  const gapPx = parseFloat(getComputedStyle(grid).gap) || 0;
+  const usableWidth = grid.clientWidth - gapPx * (cols - 1);
+  const cellSize = usableWidth / cols;
+  grid.style.gridAutoRows = cellSize + 'px';
+}
+
 (function renderProjectGrid(){
   const grid = document.getElementById('grid');
 
   projectImages.forEach((art, i) => {
     const tile = document.createElement('div');
     tile.className = 'tile';
+
+    const span = getSpanFromRatio(art.ratio || DEFAULT_RATIO);
+    tile.style.gridColumn = `span ${span.col}`;
+    tile.style.gridRow = `span ${span.row}`;
 
     if (art.url) {
       const img = document.createElement('img');
@@ -429,6 +471,14 @@ const fallbackPalettes = [
     tile.appendChild(caption);
 
     grid.appendChild(tile);
+  });
+
+  // Calcula o tamanho da célula agora, e de novo sempre que a janela mudar de tamanho.
+  sizeMosaicCells();
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(sizeMosaicCells, 120);
   });
 })();
 </script>
