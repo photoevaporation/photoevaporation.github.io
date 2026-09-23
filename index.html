@@ -4,234 +4,350 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>felipe lins — artworks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#ffffff;
-    --ink:#111111;
-    --muted:#8a8a8a;
-    --muted-2:#b3b3b3;
-    --line:#ececec;
-    --accent:#2f6fed;
-    --side-w:clamp(120px, 22vw, 280px);
-    --gap:9px;
-    --cols:4; /* <- quantas colunas de imagem por linha. Aumente este número para deixar as imagens menores, diminua para deixá-las maiores. */
-  }
 
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:"Helvetica Neue", Arial, "Segoe UI", sans-serif;
-    -webkit-font-smoothing:antialiased;
-    padding-top:env(safe-area-inset-top,0px);
-    padding-bottom:env(safe-area-inset-bottom,0px);
-  }
+/* ==========================================================================
+   MÓDULO 1 — CONFIGURAÇÃO GERAL (variáveis)
+   --------------------------------------------------------------------------
+   Tudo que costuma ser ajustado com frequência está centralizado aqui.
+   Mude os valores abaixo para afinar cores e proporções do site inteiro
+   sem precisar procurar cada regra espalhada pelo CSS.
+   ========================================================================== */
+:root{
+  /* Cores */
+  --bg:#ffffff;          /* fundo geral do site */
+  --ink:#111111;         /* cor principal do texto (títulos, nome, links ativos) */
+  --muted:#8a8a8a;        /* cinza médio (não usado no momento, reservado) */
+  --muted-2:#b3b3b3;      /* cinza claro (texto do rodapé) */
+  --line:#ececec;         /* cor de bordas sutis */
+  --accent:#2f6fed;       /* cor de destaque (botões de seta) */
 
-  a{color:inherit;text-decoration:none;}
+  /* Layout do menu lateral
+     Esse valor encolhe assim que a janela começa a ficar menor (não fica
+     "parado" esperando a tela ficar muito estreita) — é a forma de dar
+     prioridade ao tamanho das imagens: o menu cede espaço primeiro. */
+  --side-w:clamp(90px, 18vw, 340px);
 
+  /* Layout do grid de imagens
+     PRIORIDADE DE RESPONSIVIDADE: a quantidade de colunas (--cols) fica
+     sempre fixa em 4. Quando a janela fica menor, quem encolhe primeiro
+     são as margens e o menu lateral (módulos 4 e 5) — as imagens só
+     diminuem de tamanho depois que as margens já estão no mínimo. */
+  --gap:9px;   /* espaço entre uma imagem e outra */
+  --cols:4;    /* número fixo de colunas — não muda em nenhum tamanho de tela */
+}
+
+
+/* ==========================================================================
+   MÓDULO 2 — RESET / BASE
+   --------------------------------------------------------------------------
+   Ajustes globais que valem para a página inteira.
+   ========================================================================== */
+*{
+  box-sizing:border-box;
+}
+
+html, body{
+  height:100%;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Montserrat", "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+  -webkit-font-smoothing:antialiased;
+  /* respeita os "cantos arredondados"/notch de celulares */
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+
+/* ==========================================================================
+   MÓDULO 3 — ESTRUTURA GERAL DA PÁGINA
+   --------------------------------------------------------------------------
+   ".layout" é o container que divide a página em duas colunas:
+   o menu lateral (<aside>) e o conteúdo principal (<main>).
+   ========================================================================== */
+.layout{
+  display:flex;
+  max-width:1920px;   /* impede que o layout fique absurdamente esticado em monitores enormes */
+  margin:0 auto;      /* centraliza o layout inteiro na tela */
+  align-items:flex-start;
+}
+
+
+/* ==========================================================================
+   MÓDULO 4 — MENU LATERAL (sidebar)
+   --------------------------------------------------------------------------
+   Contém: nome do artista, links (About/Contact) e a lista de projetos.
+   A largura da coluna é controlada pela variável --side-w lá em cima.
+   ========================================================================== */
+
+/* Caixa do menu lateral inteiro */
+aside{
+  width:var(--side-w);
+  flex:0 0 var(--side-w);   /* não deixa a coluna crescer/encolher junto com o flex */
+  /* padding: topo | direita | baixo | esquerda
+     o último valor (esquerda) é o recuo do menu em relação à borda da janela —
+     aumente o "160px" para empurrar tudo mais para a direita. */
+  /* padding: topo | direita | baixo | esquerda
+     o último valor (esquerda) é o recuo do menu em relação à borda da janela.
+     Assim como --side-w acima, esse recuo já começa a diminuir cedo — o
+     texto do menu "anda" em direção à margem antes de qualquer imagem
+     perder tamanho. */
+  padding:clamp(16px, 6vw, 72px) clamp(8px, 2vw, 24px) clamp(16px, 6vw, 72px) clamp(10px, 8.5vw, 160px);
+  position:sticky;   /* menu acompanha o scroll da página */
+  top:0;
+  align-self:flex-start;
+}
+
+/* Nome "felipe lins" no topo do menu */
+.brand{
+  font-size:19px;
+  font-weight:400;
+  letter-spacing:0.2px;
+  margin:0 0 60px 0;   /* espaço abaixo do nome, antes dos links About/Contact */
+  color:var(--ink);
+}
+
+/* Links "About" / "Contact" */
+nav.top-links{
+  display:flex;
+  flex-direction:column;
+  gap:22px;            /* espaço entre "About" e "Contact" */
+  margin-bottom:48px;  /* espaço antes do label "PROJECTS" */
+}
+
+nav.top-links a{
+  font-size:14px;
+  color:#555;
+  transition:color .15s ease;
+}
+nav.top-links a:hover{
+  color:var(--ink);
+}
+
+/* Label "PROJECTS" acima da lista */
+.section-label{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:26px;   /* espaço entre o label e o primeiro item da lista */
+}
+
+/* Lista de projetos/subpáginas (organic loops, neural automatas, etc.) */
+.projects{
+  display:flex;
+  flex-direction:column;
+  gap:15px;   /* espaço entre um item da lista e outro */
+}
+
+.projects a{
+  font-size:14px;
+  color:#7a7a7a;
+  line-height:1.3;
+  transition:color .15s ease;
+  width:fit-content;
+}
+.projects a:hover{
+  color:var(--ink);
+}
+.projects a.active{
+  color:var(--ink);   /* item da lista correspondente à página atual */
+}
+
+
+/* ==========================================================================
+   MÓDULO 5 — CONTEÚDO PRINCIPAL (main)
+   --------------------------------------------------------------------------
+   Área à direita do menu: título "ARTWORKS" + grid de imagens.
+   As margens esquerda/direita do conteúdo são controladas aqui pelo padding
+   do <main>, de forma INDEPENDENTE uma da outra (mudar uma não afeta a outra).
+   ========================================================================== */
+main{
+  flex:1;       /* ocupa todo o espaço restante ao lado do menu */
+  min-width:0;
+  /* padding: topo | direita | baixo | esquerda
+     "esquerda" = distância entre o menu e o início das imagens
+     "direita"  = margem em branco depois da última coluna de imagens */
+  padding:clamp(20px, 6vw, 80px) clamp(8px, 12vw, 240px) clamp(30px, 10vw, 140px) clamp(8px, 13vw, 280px);
+}
+
+/* Título "ARTWORKS" */
+h1.page-title{
+  text-align:center;
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:1px;
+  margin:0 0 72px 0;   /* espaço entre o título e o grid de imagens */
+}
+
+/* Envelope simples em volta do título + grid (sem estilos próprios por
+   enquanto — existe só para facilitar agrupar/mudar os dois juntos no futuro). */
+.content-col{
+}
+
+
+/* ==========================================================================
+   MÓDULO 6 — GRID DE IMAGENS (artworks)
+   --------------------------------------------------------------------------
+   O grid preenche 100% do espaço disponível dentro do <main> (entre as
+   margens definidas no módulo 5). Número de colunas fixo = variável --cols.
+   ========================================================================== */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(var(--cols), 1fr);
+  gap:var(--gap);
+}
+
+/* Cada quadro/imagem individual do grid */
+.tile{
+  position:relative;
+  aspect-ratio:4/7;      /* proporção altura x largura de cada imagem (retrato) */
+  border-radius:2px;
+  overflow:hidden;
+  cursor:pointer;
+  background:#0a0a0a;    /* cor visível brevemente enquanto a imagem carrega */
+}
+
+/* A imagem (ou o canvas/gradiente de fallback) preenche todo o quadro */
+.tile canvas,
+.tile .art{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+
+/* Legenda que aparece ao passar o mouse sobre a imagem */
+.tile .caption{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  padding:14px 16px;
+  font-size:12px;
+  color:rgba(255,255,255,.85);
+  background:linear-gradient(to top, rgba(0,0,0,.55), transparent);
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .2s ease, transform .2s ease;
+}
+.tile:hover .caption{
+  opacity:1;
+  transform:translateY(0);
+}
+.tile:hover{
+  outline:1px solid rgba(0,0,0,.06);
+}
+
+
+/* ==========================================================================
+   MÓDULO 7 — ELEMENTOS FLUTUANTES (decorativos)
+   --------------------------------------------------------------------------
+   Botões de seta (+) e o botão de "voltar ao topo", fixos na tela.
+   Puramente visuais/decorativos, não têm funcionalidade de scroll horizontal.
+   ========================================================================== */
+/* (botões "+" removidos) */
+
+.to-top{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  width:44px; height:44px;
+  border-radius:50%;
+  background:#f2f2f2;
+  display:flex; align-items:center; justify-content:center;
+  color:#444;
+  font-size:18px;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+
+/* ==========================================================================
+   MÓDULO 8 — RODAPÉ
+   ========================================================================== */
+footer.credit{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted-2);
+  padding:40px 0 20px;
+}
+
+
+/* ==========================================================================
+   MÓDULO 9 — RESPONSIVIDADE (telas menores)
+   --------------------------------------------------------------------------
+   A quantidade de colunas do grid é sempre 4 (--cols, ver MÓDULO 1),
+   em qualquer tamanho de tela — isso não muda.
+   Prioridade de encolhimento: primeiro encolhem as margens e a largura do
+   menu lateral (já feito via clamp() nos módulos 4 e 5, sem precisar de
+   media query). Só depois disso, o tamanho de cada imagem acompanha o
+   espaço que sobrar dentro das 4 colunas fixas.
+   ========================================================================== */
+
+/* Telas pequenas (celular/tablet estreito):
+   o menu lateral vira uma barra horizontal fina no topo da página,
+   liberando o máximo de espaço possível para o grid. */
+@media (max-width: 640px){
   .layout{
-    display:flex;
-    max-width:1920px;
-    margin:0 auto;
-    align-items:flex-start;
+    flex-direction:column;
   }
-
-  /* Sidebar */
   aside{
-    width:var(--side-w);
-    flex:0 0 var(--side-w);
-    padding:clamp(32px, 6vw, 72px) clamp(12px, 2vw, 24px) clamp(32px, 6vw, 72px) clamp(12px, 9vw, 110px);
-    position:sticky;
-    top:0;
-    align-self:flex-start;
-  }
-
-  .brand{
-    font-size:19px;
-    font-weight:400;
-    letter-spacing:0.2px;
-    margin:0 0 60px 0;
-    color:var(--ink);
-  }
-
-  nav.top-links{
-    display:flex;
-    flex-direction:column;
-    gap:22px;
-    margin-bottom:48px;
-  }
-
-  nav.top-links a{
-    font-size:14px;
-    color:#555;
-    transition:color .15s ease;
-  }
-  nav.top-links a:hover{color:var(--ink);}
-
-  .section-label{
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:.4px;
-    text-transform:uppercase;
-    color:var(--ink);
-    margin-bottom:26px;
-  }
-
-  .projects{
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-  }
-
-  .projects a{
-    font-size:14px;
-    color:#7a7a7a;
-    line-height:1.3;
-    transition:color .15s ease;
-    width:fit-content;
-  }
-  .projects a:hover{color:var(--ink);}
-  .projects a.active{color:var(--ink);}
-
-  /* Main content */
-  main{
-    flex:1;
-    min-width:0;
-    padding:clamp(40px, 6vw, 80px) clamp(16px, 12vw, 240px) clamp(60px, 10vw, 140px) clamp(16px, 13vw, 280px);
-  }
-
-  h1.page-title{
-    text-align:center;
-    font-size:28px;
-    font-weight:700;
-    letter-spacing:1px;
-    margin:0 0 72px 0;
-  }
-
-  .content-col{
-    /* o grid preenche toda a largura disponível aqui dentro; as margens
-       esquerda/direita são controladas só pelo padding do <main> abaixo,
-       de forma independente uma da outra. */
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(var(--cols), 1fr);
-    gap:var(--gap);
-  }
-
-  .tile{
     position:relative;
-    aspect-ratio:4/7;
-    border-radius:2px;
-    overflow:hidden;
-    cursor:pointer;
-    background:#0a0a0a;
-  }
-
-  .tile canvas, .tile .art{
-    position:absolute;
-    inset:0;
     width:100%;
-    height:100%;
+    flex-basis:auto;
+    padding:16px 16px 12px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:16px;
   }
+  .brand{ margin:0 16px 0 0; }
+  nav.top-links{
+    flex-direction:row;
+    margin-bottom:0;
+    gap:16px;
+  }
+  .section-label{ display:none; }   /* lista de projetos fica escondida no modo mobile */
+  .projects{ display:none; }
+  main{ padding:20px 10px 40px; }
+}
 
-  .tile .caption{
-    position:absolute;
-    left:0; right:0; bottom:0;
-    padding:14px 16px;
-    font-size:12px;
-    color:rgba(255,255,255,.85);
-    background:linear-gradient(to top, rgba(0,0,0,.55), transparent);
-    opacity:0;
-    transform:translateY(6px);
-    transition:opacity .2s ease, transform .2s ease;
-  }
-  .tile:hover .caption{opacity:1; transform:translateY(0);}
-  .tile:hover{outline:1px solid rgba(0,0,0,.06);}
+/* Telas bem pequenas: reduz o espaço entre as imagens e o tamanho do
+   título — as 4 colunas continuam, só ficando mais estreitas. */
+@media (max-width: 420px){
+  :root{ --gap:5px; }
+  h1.page-title{ font-size:18px; margin-bottom:24px; letter-spacing:0.5px; }
+}
 
-  /* scroll arrows (decorative, matching original screenshot) */
-  .scroll-btn{
-    position:fixed;
-    top:50%;
-    transform:translateY(-50%);
-    width:34px;height:34px;
-    border-radius:50%;
-    border:1px solid var(--line);
-    background:#fff;
-    color:var(--accent);
-    display:flex;align-items:center;justify-content:center;
-    font-size:16px;
-    box-shadow:0 2px 6px rgba(0,0,0,.06);
-    cursor:pointer;
-    z-index:5;
-  }
-  .scroll-btn.left{left:calc(var(--side-w) + 8px);}
-  .scroll-btn.right{right:16px;}
+/* Respeita usuários que pedem menos animação no sistema operacional */
+@media (prefers-reduced-motion: reduce){
+  .tile .caption{ transition:none; }
+}
 
-  .to-top{
-    position:fixed;
-    right:24px;
-    bottom:24px;
-    width:44px;height:44px;
-    border-radius:50%;
-    background:#f2f2f2;
-    display:flex;align-items:center;justify-content:center;
-    color:#444;
-    font-size:18px;
-    cursor:pointer;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-  }
-
-  footer.credit{
-    text-align:center;
-    font-size:11px;
-    color:var(--muted-2);
-    padding:40px 0 20px;
-  }
-
-  /* Responsive */
-  @media (max-width: 1100px){
-    .grid{grid-template-columns:repeat(3,1fr);}
-  }
-
-  @media (max-width: 640px){
-    .layout{flex-direction:column;}
-    aside{
-      position:relative;
-      width:100%;
-      flex-basis:auto;
-      padding:28px 24px 20px;
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:24px;
-    }
-    .brand{margin:0 24px 0 0;}
-    nav.top-links{flex-direction:row;margin-bottom:0;gap:20px;}
-    .section-label{display:none;}
-    .projects{display:none;}
-    main{padding:32px 16px 60px;}
-    .grid{grid-template-columns:repeat(2,1fr);}
-    .scroll-btn{display:none;}
-  }
-
-  @media (max-width: 480px){
-    .grid{grid-template-columns:1fr 1fr; gap:8px;}
-    h1.page-title{font-size:22px;}
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .tile .caption{transition:none;}
-  }
 </style>
 </head>
 <body>
 
+<!-- ==========================================================================
+     ESTRUTURA HTML
+     Cada bloco abaixo corresponde a um módulo do CSS acima.
+     ========================================================================== -->
+
 <div class="layout">
 
+  <!-- MÓDULO 4 — Menu lateral -->
   <aside>
     <p class="brand">felipe lins</p>
 
@@ -261,31 +377,35 @@
     </nav>
   </aside>
 
+  <!-- MÓDULO 5 e 6 — Conteúdo principal + grid de imagens -->
   <main>
     <div class="content-col">
       <h1 class="page-title">ARTWORKS</h1>
-      <div class="grid" id="grid"></div>
+      <div class="grid" id="grid"><!-- preenchido via JavaScript, ver MÓDULO 10 --></div>
     </div>
-    <footer class="credit">Edite o array "artworks" no final do HTML para trocar as imagens.</footer>
+    <footer class="credit">Edite o array "artworks" lá embaixo no &lt;script&gt; para trocar as imagens.</footer>
   </main>
 
 </div>
 
-<div class="scroll-btn left" title="scroll">+</div>
-<div class="scroll-btn right" title="scroll">+</div>
-<div class="to-top" title="back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</div>
+<!-- MÓDULO 7 — Elementos flutuantes decorativos -->
+<div class="to-top" title="voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</div>
+
 
 <script>
-/* ======================================================================
-   ARTWORKS — edite aqui
-   ======================================================================
-   Para colocar suas imagens, só troque o valor de "url" de cada item
-   abaixo pela URL da sua imagem (link direto para o arquivo .jpg/.png/.webp).
-   Pode adicionar, remover ou reordenar itens à vontade — o grid se
-   ajusta sozinho. Enquanto "url" estiver vazia (""), aparece um
-   gradiente de cor no lugar, só pra não ficar em branco.
-   ====================================================================== */
+/* ==========================================================================
+   MÓDULO 10 — DADOS DAS OBRAS (é aqui que você mexe no dia a dia)
+   --------------------------------------------------------------------------
+   Para colocar suas imagens, troque o valor de "url" de cada item abaixo
+   pela URL direta da sua imagem (link terminando em .jpg, .png, .webp etc).
 
+   - Pode adicionar, remover ou reordenar itens à vontade — o grid se
+     ajusta sozinho, não precisa mexer em mais nada.
+   - "title" é o texto que aparece na legenda ao passar o mouse.
+   - Enquanto "url" estiver vazia (""), a imagem é substituída por um
+     gradiente de cor (definido em fallbackPalettes logo abaixo), só para
+     o quadro não ficar em branco.
+   ========================================================================== */
 const artworks = [
   { title: "submerge",         url: "compres-ezgif.com-resize.gif" },
   { title: "gilded drift",     url: "" },
@@ -297,7 +417,8 @@ const artworks = [
   { title: "cellular red",     url: "" },
 ];
 
-// Cores de fallback usadas somente quando "url" está vazia acima.
+/* Cores de fallback (usadas somente quando "url" está vazia acima).
+   Cada linha é um par [cor inicial, cor final] do gradiente. */
 const fallbackPalettes = [
   ['#031b1f','#0c4a52'],
   ['#1a1206','#c9a227'],
@@ -309,34 +430,44 @@ const fallbackPalettes = [
   ['#210505','#e0c9a0'],
 ];
 
-const grid = document.getElementById('grid');
 
-artworks.forEach((art, i)=>{
-  const tile = document.createElement('div');
-  tile.className = 'tile';
+/* ==========================================================================
+   MÓDULO 11 — RENDERIZAÇÃO DO GRID
+   --------------------------------------------------------------------------
+   Lê a lista "artworks" acima e monta um quadro (.tile) para cada item
+   dentro do grid. Normalmente não precisa mexer aqui — só no MÓDULO 10.
+   ========================================================================== */
+(function renderArtworkGrid(){
+  const grid = document.getElementById('grid');
 
-  if(art.url){
-    const img = document.createElement('img');
-    img.src = art.url;
-    img.alt = art.title;
-    img.loading = 'lazy';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
-    tile.appendChild(img);
-  } else {
-    const [c1,c2] = fallbackPalettes[i % fallbackPalettes.length];
-    tile.style.background = `linear-gradient(155deg, ${c1}, ${c2})`;
-  }
+  artworks.forEach((art, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
 
-  const caption = document.createElement('div');
-  caption.className = 'caption';
-  caption.textContent = art.title;
-  tile.appendChild(caption);
+    if (art.url) {
+      // Tem imagem definida: cria a tag <img> preenchendo o quadro inteiro.
+      const img = document.createElement('img');
+      img.src = art.url;
+      img.alt = art.title;
+      img.loading = 'lazy';
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+      tile.appendChild(img);
+    } else {
+      // Sem imagem: usa um gradiente de cor como espaço reservado (fallback).
+      const [corInicial, corFinal] = fallbackPalettes[i % fallbackPalettes.length];
+      tile.style.background = `linear-gradient(155deg, ${corInicial}, ${corFinal})`;
+    }
 
-  grid.appendChild(tile);
-});
+    // Legenda com o título, exibida no hover (ver .tile .caption no CSS).
+    const caption = document.createElement('div');
+    caption.className = 'caption';
+    caption.textContent = art.title;
+    tile.appendChild(caption);
+
+    grid.appendChild(tile);
+  });
+})();
 </script>
 
 </body>
-</html>
-
 </html>
