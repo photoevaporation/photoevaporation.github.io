@@ -36,7 +36,7 @@
   --side-w:clamp(90px, 18vw, 340px);
 
   --gap:9px;   /* espaço entre uma imagem e outra do grid */
-  --cols:4;    /* número fixo de colunas do grid — não muda em nenhum tamanho de tela */
+  --cols:4;    /* colunas no desktop — muda pra 3 (tablet) e 2 (celular) no MÓDULO 9 */
 }
 
 
@@ -279,11 +279,23 @@ footer.credit{
 /* ==========================================================================
    MÓDULO 9 — RESPONSIVIDADE (telas menores)
    --------------------------------------------------------------------------
-   Mesma prioridade das outras páginas: o menu cede espaço primeiro
-   (já é fluido via clamp() nos módulos 4 e 5); o grid sempre mantém
-   4 colunas, só ficando mais estreitas.
+   Mesma lógica do index.html: --cols muda em 3 faixas —
+     desktop (largura > 1024px)             → 4 colunas (padrão, MÓDULO 1)
+     tablet  (largura entre 641px e 1024px) → 3 colunas
+     celular (largura até 640px)            → 2 colunas
+   O menu cede espaço primeiro (já é fluido via clamp() nos módulos 4 e
+   5); dentro de cada faixa, o tamanho de cada imagem acompanha o
+   espaço que sobrar nas colunas daquela faixa.
    ========================================================================== */
+
+/* TABLET — 3 imagens por linha. */
+@media (max-width: 1024px){
+  :root{ --cols:3; }
+}
+
+/* CELULAR — 2 imagens por linha, menu vira barra horizontal no topo. */
 @media (max-width: 640px){
+  :root{ --cols:2; }
   .layout{
     flex-direction:column;
   }
