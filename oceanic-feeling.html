@@ -190,24 +190,26 @@ h1.page-title{
 
 
 /* ==========================================================================
-   MÓDULO 7 — GRID DE IMAGENS DO PROJETO (mosaico)
+   MÓDULO 7 — GRID DE IMAGENS DO PROJETO (masonry / "alvenaria")
    --------------------------------------------------------------------------
-   Igual ao mosaico do index.html: existe uma "célula" quadrada de base,
-   e cada imagem ocupa 1 ou 2 células dependendo se é quadrada, retrato
-   ou paisagem (ver MÓDULO 11 lá embaixo, getSpanFromRatio). O tamanho
-   da célula é calculado via JavaScript, não fixado aqui no CSS.
+   Igual ao index.html: layout tipo Pinterest via "column-count" — cada
+   imagem mantém sua altura natural (proporção real do arquivo), sem
+   ser cortada em blocos fixos. Preenche a coluna 1 de cima a baixo,
+   depois a coluna 2, e assim por diante, na ordem do array
+   "projectImages" (ver MÓDULO 11 lá embaixo).
    ========================================================================== */
 .grid{
-  display:grid;
-  grid-template-columns:repeat(var(--cols), 1fr);
-  grid-auto-flow:dense;   /* preenche buracos deixados por imagens grandes */
-  gap:var(--gap);
+  column-count:var(--cols);
+  column-gap:var(--gap);
 }
 
-/* O tamanho de cada .tile vem do grid-column/grid-row aplicado via
-   JavaScript (span 1 ou 2 células) — por isso sem aspect-ratio fixo. */
+/* A altura de cada .tile vem do tamanho natural da imagem dentro dele
+   (width:100%; height:auto na imagem) — não é fixada aqui. */
 .tile{
   position:relative;
+  display:block;
+  break-inside:avoid;         /* evita cortar uma imagem ao meio entre colunas */
+  margin-bottom:var(--gap);   /* espaço vertical entre imagens da mesma coluna */
   border-radius:2px;
   overflow:hidden;
   cursor:pointer;
@@ -215,11 +217,18 @@ h1.page-title{
 }
 
 .tile img{
-  position:absolute;
-  inset:0;
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* Gradiente de fallback (quando não há "url") — precisa de uma altura
+   definida via aspect-ratio, já que não existe imagem real pra ditar
+   o tamanho (ver MÓDULO 11). */
+.tile .art{
+  display:block;
   width:100%;
   height:100%;
-  object-fit:cover;
 }
 
 .tile .caption{
@@ -379,20 +388,20 @@ footer.credit{
    ajusta sozinho. Enquanto "url" estiver vazia (""), aparece um
    gradiente de cor no lugar, só pra não ficar em branco.
 
-   "ratio" é OPCIONAL. Quando a imagem tem "url", a proporção é
-   detectada automaticamente a partir do arquivo real assim que ele
-   carrega — não precisa preencher "ratio" nesse caso. Só use "ratio"
-   se quiser forçar um valor manualmente, ou pra itens sem "url" ainda.
+   "ratio" é OPCIONAL, só serve pra dar um "palpite" de altura antes da
+   imagem carregar e pra definir a altura do gradiente de fallback
+   quando não há "url". Quando a imagem tem "url", a altura final
+   sempre vem do arquivo real (masonry de verdade).
    ========================================================================== */
 const projectImages = [
-  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif", ratio: "1/1" },
-  { title: "oceanic feeling 02", url: "oceanic_feeling/oceanic_feeling_b.gif" },
-  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_c.gif" },
-  { title: "oceanic feeling 04", url: "oceanic_feeling/oceanic_feeling_d.gif" },
-  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_e.gif" },
-  { title: "oceanic feeling 06", url: "oceanic_feeling/oceanic_feeling_f.gif" },
-  //{ title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_a.gif" },
-  //{ title: "oceanic feeling 08", url: "oceanic_feeling/oceanic_feeling_a.gif" },
+  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif" },
+  { title: "oceanic feeling 02", url: "magic_spells/magic_spells_b.gif" },
+  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_b.gif" },
+  { title: "oceanic feeling 04", url: "magic_spells/magic_spells_c.gif" },
+  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_c.gif" },
+  { title: "oceanic feeling 06", url: "magic_spells/magic_spells_d.gif" },
+  { title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_d.gif" },
+  { title: "oceanic feeling 08", url: "oceanic_feeling/oceanic_feeling_e.gif" },
 ];
 
 /* Cores de fallback (usadas somente quando "url" está vazia acima). */
@@ -412,43 +421,13 @@ const DEFAULT_RATIO = "3/4";
 
 
 /* ==========================================================================
-   MÓDULO 11 — RENDERIZAÇÃO DO GRID (mosaico, com detecção automática)
+   MÓDULO 11 — RENDERIZAÇÃO DO GRID (masonry)
    --------------------------------------------------------------------------
-   Mesma lógica do index.html: quando a imagem tem "url", a proporção é
-   lida do próprio arquivo (naturalWidth/naturalHeight) assim que ele
-   carrega, e o quadro é reencaixado no mosaico automaticamente.
-   sizeMosaicCells() calcula o tamanho real da célula em pixels,
-   recalculando a cada redimensionamento da janela. Normalmente não
+   Mesma lógica do index.html: lê "projectImages" e monta um quadro
+   (.tile) por item, na ordem do array. O CSS ("column-count", MÓDULO 7)
+   cuida de encaixar tudo em colunas tipo Pinterest. Normalmente não
    precisa mexer aqui — só no MÓDULO 10.
    ========================================================================== */
-
-function ratioStringToNumber(ratioStr){
-  const [w, h] = String(ratioStr).split('/').map(Number);
-  return (w && h) ? (w / h) : 1;
-}
-
-function getSpanFromRatioNumber(r){
-  if (r > 1.2)  return { col: 2, row: 1 };  // paisagem
-  if (r < 0.85) return { col: 1, row: 2 };  // retrato
-  return { col: 1, row: 1 };                 // quadrada
-}
-
-function applySpan(tile, ratioNumber){
-  const span = getSpanFromRatioNumber(ratioNumber);
-  tile.style.gridColumn = `span ${span.col}`;
-  tile.style.gridRow = `span ${span.row}`;
-}
-
-function sizeMosaicCells(){
-  const grid = document.getElementById('grid');
-  if (!grid) return;
-  const cols = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
-  const gapPx = parseFloat(getComputedStyle(grid).gap) || 0;
-  const usableWidth = grid.clientWidth - gapPx * (cols - 1);
-  const cellSize = usableWidth / cols;
-  grid.style.gridAutoRows = cellSize + 'px';
-}
-
 (function renderProjectGrid(){
   const grid = document.getElementById('grid');
 
@@ -456,28 +435,21 @@ function sizeMosaicCells(){
     const tile = document.createElement('div');
     tile.className = 'tile';
 
-    const manualRatio = art.ratio ? ratioStringToNumber(art.ratio) : null;
-    applySpan(tile, manualRatio ?? ratioStringToNumber(DEFAULT_RATIO));
-
     if (art.url) {
+      // Altura do quadro acompanha a proporção real do arquivo
+      // automaticamente (ver ".tile img" no CSS: height:auto).
       const img = document.createElement('img');
+      img.src = art.url;
       img.alt = art.title;
       img.loading = 'lazy';
-
-      // Detecção automática: só roda se "ratio" NÃO foi definido à mão.
-      if (manualRatio === null){
-        img.addEventListener('load', () => {
-          if (img.naturalWidth && img.naturalHeight){
-            applySpan(tile, img.naturalWidth / img.naturalHeight);
-          }
-        });
-      }
-
-      img.src = art.url;   // definir o src por último dispara o carregamento
       tile.appendChild(img);
     } else {
       const [corInicial, corFinal] = fallbackPalettes[i % fallbackPalettes.length];
-      tile.style.background = `linear-gradient(155deg, ${corInicial}, ${corFinal})`;
+      const art_div = document.createElement('div');
+      art_div.className = 'art';
+      art_div.style.background = `linear-gradient(155deg, ${corInicial}, ${corFinal})`;
+      art_div.style.aspectRatio = art.ratio || DEFAULT_RATIO;
+      tile.appendChild(art_div);
     }
 
     const caption = document.createElement('div');
@@ -486,14 +458,6 @@ function sizeMosaicCells(){
     tile.appendChild(caption);
 
     grid.appendChild(tile);
-  });
-
-  // Calcula o tamanho da célula agora, e de novo sempre que a janela mudar de tamanho.
-  sizeMosaicCells();
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(sizeMosaicCells, 120);
   });
 })();
 </script>
