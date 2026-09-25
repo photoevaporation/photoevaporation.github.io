@@ -147,9 +147,9 @@ nav.top-links a.active{
    --------------------------------------------------------------------------
    Igual ao index.html: em telas de tablet/celular (até 1024px, ver
    MÓDULO 8/responsividade lá embaixo), o menu lateral (MÓDULO 4) some
-   e no lugar aparece essa barra fina no topo — nome à esquerda, ícone
-   de 3 tracinhos (☰) à direita — que abre um painel em tela cheia com
-   About / Contact / Projects.
+   e no lugar aparece essa barra fina no topo — nome à esquerda,
+   "About", "Contact" e "Projects" à direita. Clicar em "Projects"
+   abre um painel em tela cheia só com a lista de projetos.
    ========================================================================== */
 .mobile-topbar{
   display:none;
@@ -165,23 +165,26 @@ nav.top-links a.active{
   margin:0;
 }
 
-.menu-toggle{
+.mobile-topbar-links{
   display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:5px;
-  width:32px;
-  height:32px;
-  padding:0;
-  border:none;
+  align-items:center;
+  gap:20px;
+}
+.mobile-topbar-links a,
+.mobile-topbar-links button{
+  font:inherit;
+  font-size:14px;
+  color:#555;
   background:none;
+  border:none;
+  padding:0;
   cursor:pointer;
 }
-.menu-toggle span{
-  display:block;
-  width:100%;
-  height:2px;
-  background:var(--ink);
+.mobile-topbar-links a.active{
+  color:var(--ink);
+}
+.mobile-topbar-links .projects-toggle[aria-expanded="true"]{
+  color:var(--ink);
 }
 
 .mobile-menu{
@@ -231,14 +234,6 @@ nav.top-links a.active{
 }
 .mobile-menu-links a.active{
   color:var(--ink);
-}
-.mobile-menu-links .mobile-menu-label{
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.4px;
-  text-transform:uppercase;
-  color:var(--ink);
-  margin-top:12px;
 }
 
 
@@ -339,7 +334,7 @@ footer.credit{
    MÓDULO 8 — RESPONSIVIDADE (telas menores)
    --------------------------------------------------------------------------
    Mesma lógica das outras páginas: abaixo de 1024px (tablet e celular),
-   o menu lateral vira o ícone de 3 tracinhos (MÓDULO 4B) em vez do
+   o menu lateral vira a barra com "About / Contact / Projects" (MÓDULO 4B) em vez do
    menu lateral fixo. Abaixo de 780px, texto e imagem da bio empilham
    em vez de ficarem lado a lado.
    ========================================================================== */
@@ -383,19 +378,18 @@ footer.credit{
 <!-- MÓDULO 4B — Barra mobile (só aparece em tablet/celular, ver MÓDULO 8) -->
 <header class="mobile-topbar">
   <a class="brand" href="index.html">felipe lins</a>
-  <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="mobile-topbar-links">
+    <a href="about.html" class="active">About</a>
+    <a href="#contact">Contact</a>
+    <button class="projects-toggle" id="menu-toggle" aria-label="Abrir lista de projetos" aria-expanded="false" aria-controls="mobile-menu">Projects</button>
+  </div>
 </header>
 
-<!-- Painel de menu em tela cheia (tablet/celular) — mesmos links do
-     menu lateral abaixo, com "About" marcado como ativo. -->
+<!-- Painel em tela cheia SÓ com a lista de projetos (About/Contact já
+     aparecem direto na barra acima). -->
 <div class="mobile-menu" id="mobile-menu">
   <button class="mobile-menu-close" id="menu-close" aria-label="Fechar menu">&times;</button>
   <nav class="mobile-menu-links">
-    <a href="about.html" class="active">About</a>
-    <a href="#contact">Contact</a>
-    <div class="mobile-menu-label">Projects</div>
     <a href="index.html">organic loops</a>
     <a href="index.html">neural automatas</a>
     <a href="index.html">magic spells</a>
@@ -482,7 +476,7 @@ footer.credit{
 /* ==========================================================================
    MÓDULO 8B — MENU MOBILE (abrir/fechar o painel de tablet/celular)
    --------------------------------------------------------------------------
-   Igual ao index.html — controla o ícone de 3 tracinhos do MÓDULO 4B.
+   Igual ao index.html — controla o botão "Projects" do MÓDULO 4B.
    ========================================================================== */
 (function mobileMenu(){
   const toggleBtn = document.getElementById('menu-toggle');
