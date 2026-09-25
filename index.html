@@ -180,15 +180,16 @@ nav.top-links a:hover{
    --------------------------------------------------------------------------
    Em telas de tablet/celular (largura até 1024px — ver MÓDULO 9), o
    menu lateral inteiro (MÓDULO 4) fica escondido, e no lugar dele
-   aparece essa barra fina no topo: só o nome "felipe lins" à esquerda
-   e um ícone de 3 tracinhos (☰) à direita. Clicando nesse ícone, abre
-   um painel em tela cheia com About / Contact / Projects — os mesmos
-   links do menu lateral, só que empilhados e centralizados.
+   aparece essa barra fina no topo: "felipe lins" à esquerda, e à
+   direita os links "About", "Contact" e "Projects" direto (sem ícone
+   de hambúrguer). Clicar em "Projects" abre um painel em tela cheia
+   só com a lista de projetos (About/Contact já ficam visíveis na
+   própria barra, não precisam se repetir no painel).
    Em telas de desktop (acima de 1024px), tudo isso fica com
    "display:none" e nunca aparece — só o menu lateral normal é usado.
    ========================================================================== */
 
-/* Barra fina do topo (escondida por padrão; só some pra "flex" na
+/* Barra fina do topo (escondida por padrão; só vira "flex" na
    media query do MÓDULO 9) */
 .mobile-topbar{
   display:none;
@@ -204,29 +205,30 @@ nav.top-links a:hover{
   margin:0;   /* no menu lateral tem margem embaixo; aqui não precisa */
 }
 
-/* Botão "hambúrguer" (ícone de 3 tracinhos) */
-.menu-toggle{
+/* Grupo de links à direita da barra: "About", "Contact", "Projects" */
+.mobile-topbar-links{
   display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:5px;
-  width:32px;
-  height:32px;
-  padding:0;
-  border:none;
+  align-items:center;
+  gap:20px;
+}
+.mobile-topbar-links a,
+.mobile-topbar-links button{
+  font:inherit;
+  font-size:14px;
+  color:#555;
   background:none;
+  border:none;
+  padding:0;
   cursor:pointer;
 }
-.menu-toggle span{
-  display:block;
-  width:100%;
-  height:2px;
-  background:var(--ink);
+/* "Projects" fica marcado (preto) enquanto o painel dele está aberto */
+.mobile-topbar-links .projects-toggle[aria-expanded="true"]{
+  color:var(--ink);
 }
 
-/* Painel de menu em tela cheia (escondido por padrão via
-   transform + visibility; a classe ".open", aplicada por JavaScript
-   no MÓDULO 12, é o que revela o painel). */
+/* Painel em tela cheia com a lista de projetos (escondido por padrão
+   via transform + visibility; a classe ".open", aplicada por
+   JavaScript no MÓDULO 9B, é o que revela o painel). */
 .mobile-menu{
   position:fixed;
   inset:0;
@@ -261,7 +263,7 @@ nav.top-links a:hover{
   cursor:pointer;
 }
 
-/* Lista de links dentro do painel — empilhados, centralizados */
+/* Lista de projetos dentro do painel — empilhada, centralizada */
 .mobile-menu-links{
   display:flex;
   flex-direction:column;
@@ -277,20 +279,14 @@ nav.top-links a:hover{
 .mobile-menu-links a.active{
   color:var(--ink);
 }
-.mobile-menu-links .mobile-menu-label{
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.4px;
-  text-transform:uppercase;
-  color:var(--ink);
-  margin-top:12px;   /* um respiro extra antes do label "PROJECTS" */
-}
 
 
 /* ==========================================================================
    MÓDULO 5 — CONTEÚDO PRINCIPAL (main)
    --------------------------------------------------------------------------
-   Área à direita do menu: título "ARTWORKS" + grid de imagens.
+   Área à direita do menu: grid de imagens (sem título — a primeira
+   linha das artes fica alinhada com o topo do menu lateral, na mesma
+   altura do nome "felipe lins").
    As margens esquerda/direita do conteúdo são controladas aqui pelo padding
    do <main>, de forma INDEPENDENTE uma da outra (mudar uma não afeta a outra).
    ========================================================================== */
@@ -298,22 +294,15 @@ main{
   flex:1;       /* ocupa todo o espaço restante ao lado do menu */
   min-width:0;
   /* padding: topo | direita | baixo | esquerda
+     "topo"     = IGUAL ao padding-top do <aside> (MÓDULO 4), de propósito —
+                  é isso que alinha a primeira linha de imagens com "felipe lins"
      "esquerda" = distância entre o menu e o início das imagens
      "direita"  = margem em branco depois da última coluna de imagens */
-  padding:clamp(20px, 6vw, 80px) clamp(8px, 12vw, 240px) clamp(30px, 10vw, 140px) clamp(8px, 13vw, 280px);
+  padding:clamp(16px, 6vw, 72px) clamp(8px, 12vw, 240px) clamp(30px, 10vw, 140px) clamp(8px, 13vw, 280px);
 }
 
-/* Título "ARTWORKS" */
-h1.page-title{
-  text-align:center;
-  font-size:28px;
-  font-weight:700;
-  letter-spacing:1px;
-  margin:0 0 72px 0;   /* espaço entre o título e o grid de imagens */
-}
-
-/* Envelope simples em volta do título + grid (sem estilos próprios por
-   enquanto — existe só para facilitar agrupar/mudar os dois juntos no futuro). */
+/* Envelope simples em volta do grid (sem estilos próprios por
+   enquanto — existe só para facilitar agrupar/mudar no futuro). */
 .content-col{
 }
 
@@ -459,11 +448,9 @@ footer.credit{
   .mobile-topbar{ padding:16px 16px; }
 }
 
-/* Telas bem pequenas: reduz o espaço entre as imagens e o tamanho do
-   título — continua em 2 colunas (regra acima), só ficando mais estreitas. */
+/* Telas bem pequenas: reduz o espaço entre as imagens. */
 @media (max-width: 420px){
   :root{ --gap:5px; }
-  h1.page-title{ font-size:18px; margin-bottom:24px; letter-spacing:0.5px; }
 }
 
 /* Respeita usuários que pedem menos animação no sistema operacional */
@@ -484,21 +471,20 @@ footer.credit{
 <!-- MÓDULO 4B — Barra mobile (só aparece em tablet/celular, ver MÓDULO 9) -->
 <header class="mobile-topbar">
   <a class="brand" href="index.html">felipe lins</a>
-  <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="mobile-topbar-links">
+    <a href="about.html">About</a>
+    <a href="#contact">Contact</a>
+    <button class="projects-toggle" id="menu-toggle" aria-label="Abrir lista de projetos" aria-expanded="false" aria-controls="mobile-menu">Projects</button>
+  </div>
 </header>
 
-<!-- Painel de menu em tela cheia (tablet/celular) — mesmos links do
-     menu lateral do MÓDULO 4, só que num layout diferente pra caber
-     numa tela pequena. Se editar os links do menu lateral, repita
+<!-- Painel em tela cheia SÓ com a lista de projetos (About/Contact já
+     aparecem direto na barra acima, não precisam se repetir aqui). Se
+     editar a lista de projetos do menu lateral (MÓDULO 4), repita
      aqui também (e nas outras páginas do site). -->
 <div class="mobile-menu" id="mobile-menu">
   <button class="mobile-menu-close" id="menu-close" aria-label="Fechar menu">&times;</button>
   <nav class="mobile-menu-links">
-    <a href="about.html">About</a>
-    <a href="#contact">Contact</a>
-    <div class="mobile-menu-label">Projects</div>
     <a href="#" class="active">organic loops</a>
     <a href="#">neural automatas</a>
     <a href="#">magic spells</a>
@@ -553,7 +539,6 @@ footer.credit{
   <!-- MÓDULO 5 e 6 — Conteúdo principal + grid de imagens -->
   <main>
     <div class="content-col">
-      <h1 class="page-title">ARTWORKS</h1>
       <div class="grid" id="grid"><!-- preenchido via JavaScript, ver MÓDULO 10 --></div>
     </div>
     <footer class="credit">Edite o array "artworks" lá embaixo no &lt;script&gt; para trocar as imagens.</footer>
@@ -569,11 +554,12 @@ footer.credit{
 /* ==========================================================================
    MÓDULO 9B — MENU MOBILE (abrir/fechar o painel de tablet/celular)
    --------------------------------------------------------------------------
-   Controla o ícone de 3 tracinhos (MÓDULO 4B): clicar nele abre o
-   painel em tela cheia; clicar no "×" ou em qualquer link dele fecha
-   de novo. Só tem efeito visual em telas de tablet/celular (abaixo de
-   1024px) — em telas de desktop o painel fica sempre com
-   "display:none" (ver MÓDULO 9), então esse código não faz diferença lá.
+   Controla o botão "Projects" da barra mobile (MÓDULO 4B): clicar
+   nele abre o painel em tela cheia com a lista de projetos; clicar no
+   "×" ou em qualquer link dele fecha de novo. Só tem efeito visual em
+   telas de tablet/celular (abaixo de 1024px) — em telas de desktop o
+   painel fica sempre com "display:none" (ver MÓDULO 9), então esse
+   código não faz diferença lá.
    ========================================================================== */
 (function mobileMenu(){
   const toggleBtn = document.getElementById('menu-toggle');
