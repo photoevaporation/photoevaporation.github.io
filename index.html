@@ -32,12 +32,18 @@
   --side-w:clamp(90px, 18vw, 340px);
 
   /* Layout do grid de imagens
-     PRIORIDADE DE RESPONSIVIDADE: a quantidade de colunas (--cols) fica
-     sempre fixa em 4. Quando a janela fica menor, quem encolhe primeiro
-     são as margens e o menu lateral (módulos 4 e 5) — as imagens só
-     diminuem de tamanho depois que as margens já estão no mínimo. */
+     --cols muda em 3 faixas de largura de tela (ver MÓDULO 9,
+     responsividade, lá embaixo, pra ver os valores de cada faixa):
+       desktop (tela larga)  → 4 imagens por linha
+       tablet (tela média)   → 3 imagens por linha
+       celular (tela estreita) → 2 imagens por linha
+     O valor abaixo é o "padrão" (desktop) — os outros dois são
+     sobrescritos nas media queries do MÓDULO 9. Além disso, as margens
+     e o menu lateral (módulos 4 e 5) continuam encolhendo antes de
+     qualquer coisa, dando o máximo de espaço possível pras imagens em
+     cada uma dessas faixas. */
   --gap:9px;   /* espaço entre uma imagem e outra */
-  --cols:4;    /* número fixo de colunas — não muda em nenhum tamanho de tela */
+  --cols:4;    /* colunas no desktop — ver MÓDULO 9 para tablet/celular */
 }
 
 
@@ -170,6 +176,118 @@ nav.top-links a:hover{
 
 
 /* ==========================================================================
+   MÓDULO 4B — MENU MOBILE (tablet e celular)
+   --------------------------------------------------------------------------
+   Em telas de tablet/celular (largura até 1024px — ver MÓDULO 9), o
+   menu lateral inteiro (MÓDULO 4) fica escondido, e no lugar dele
+   aparece essa barra fina no topo: só o nome "felipe lins" à esquerda
+   e um ícone de 3 tracinhos (☰) à direita. Clicando nesse ícone, abre
+   um painel em tela cheia com About / Contact / Projects — os mesmos
+   links do menu lateral, só que empilhados e centralizados.
+   Em telas de desktop (acima de 1024px), tudo isso fica com
+   "display:none" e nunca aparece — só o menu lateral normal é usado.
+   ========================================================================== */
+
+/* Barra fina do topo (escondida por padrão; só some pra "flex" na
+   media query do MÓDULO 9) */
+.mobile-topbar{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 24px;
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  z-index:20;
+}
+.mobile-topbar .brand{
+  margin:0;   /* no menu lateral tem margem embaixo; aqui não precisa */
+}
+
+/* Botão "hambúrguer" (ícone de 3 tracinhos) */
+.menu-toggle{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:5px;
+  width:32px;
+  height:32px;
+  padding:0;
+  border:none;
+  background:none;
+  cursor:pointer;
+}
+.menu-toggle span{
+  display:block;
+  width:100%;
+  height:2px;
+  background:var(--ink);
+}
+
+/* Painel de menu em tela cheia (escondido por padrão via
+   transform + visibility; a classe ".open", aplicada por JavaScript
+   no MÓDULO 12, é o que revela o painel). */
+.mobile-menu{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:30;
+  display:none;              /* só vira "block" na media query do MÓDULO 9 */
+  overflow-y:auto;
+  transform:translateY(-12px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.mobile-menu.open{
+  opacity:1;
+  transform:translateY(0);
+  visibility:visible;
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+/* Botão "×" de fechar, canto superior direito do painel */
+.mobile-menu-close{
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:36px;
+  height:36px;
+  border:none;
+  background:none;
+  font-size:26px;
+  line-height:1;
+  color:var(--ink);
+  cursor:pointer;
+}
+
+/* Lista de links dentro do painel — empilhados, centralizados */
+.mobile-menu-links{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:26px;
+  padding:96px 24px 60px;
+  text-align:center;
+}
+.mobile-menu-links a{
+  font-size:16px;
+  color:#7a7a7a;
+}
+.mobile-menu-links a.active{
+  color:var(--ink);
+}
+.mobile-menu-links .mobile-menu-label{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-top:12px;   /* um respiro extra antes do label "PROJECTS" */
+}
+
+
+/* ==========================================================================
    MÓDULO 5 — CONTEÚDO PRINCIPAL (main)
    --------------------------------------------------------------------------
    Área à direita do menu: título "ARTWORKS" + grid de imagens.
@@ -201,32 +319,55 @@ h1.page-title{
 
 
 /* ==========================================================================
-   MÓDULO 6 — GRID DE IMAGENS (artworks)
+   MÓDULO 6 — GRID DE IMAGENS (masonry / "alvenaria")
    --------------------------------------------------------------------------
-   O grid preenche 100% do espaço disponível dentro do <main> (entre as
-   margens definidas no módulo 5). Número de colunas fixo = variável --cols.
+   Layout tipo Pinterest: --cols colunas de largura igual, e cada imagem
+   mantém sua ALTURA NATURAL (baseada na proporção real do arquivo — ver
+   MÓDULO 11), empilhando de cima pra baixo dentro da coluna. Nenhuma
+   imagem é cortada em blocos fixos; paisagens ficam mais baixas,
+   retratos mais altos, do jeito que realmente são.
+
+   Tecnicamente isso é feito com "column-count" (colunas de texto do
+   CSS) em vez de "display:grid" — é a forma mais simples de conseguir
+   esse efeito só com CSS, sem precisar recalcular posições via JS.
+   A ORDEM de preenchimento é: primeiro enche a coluna 1 de cima a
+   baixo, depois a coluna 2, e assim por diante (ordem do array
+   "artworks" no MÓDULO 10).
    ========================================================================== */
 .grid{
-  display:grid;
-  grid-template-columns:repeat(var(--cols), 1fr);
-  gap:var(--gap);
+  column-count:var(--cols);
+  column-gap:var(--gap);
 }
 
-/* Cada quadro/imagem individual do grid */
+/* Cada quadro/imagem individual do grid.
+   "break-inside:avoid" impede que uma imagem seja cortada ao meio na
+   transição entre colunas. A altura NÃO é fixada aqui — ela vem do
+   tamanho natural da imagem (largura 100% da coluna, altura automática
+   mantendo a proporção do arquivo). */
 .tile{
   position:relative;
-  aspect-ratio:4/7;      /* proporção altura x largura de cada imagem (retrato) */
+  display:block;
+  break-inside:avoid;
+  margin-bottom:var(--gap);   /* espaço vertical entre uma imagem e a próxima, na mesma coluna */
   border-radius:2px;
   overflow:hidden;
   cursor:pointer;
-  background:#0a0a0a;    /* cor visível brevemente enquanto a imagem carrega */
+  background:#0a0a0a;         /* cor visível brevemente enquanto a imagem carrega */
 }
 
-/* A imagem (ou o canvas/gradiente de fallback) preenche todo o quadro */
-.tile canvas,
+/* A imagem preenche a largura da coluna; a altura acompanha a
+   proporção natural do arquivo (sem cortar). */
+.tile img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* O gradiente de fallback (quando não há "url") precisa de uma altura
+   definida, já que não existe imagem real pra "ditar" o tamanho —
+   ver MÓDULO 11, que aplica aspect-ratio nesse caso. */
 .tile .art{
-  position:absolute;
-  inset:0;
+  display:block;
   width:100%;
   height:100%;
 }
@@ -289,44 +430,37 @@ footer.credit{
 /* ==========================================================================
    MÓDULO 9 — RESPONSIVIDADE (telas menores)
    --------------------------------------------------------------------------
-   A quantidade de colunas do grid é sempre 4 (--cols, ver MÓDULO 1),
-   em qualquer tamanho de tela — isso não muda.
-   Prioridade de encolhimento: primeiro encolhem as margens e a largura do
-   menu lateral (já feito via clamp() nos módulos 4 e 5, sem precisar de
-   media query). Só depois disso, o tamanho de cada imagem acompanha o
-   espaço que sobrar dentro das 4 colunas fixas.
+   A quantidade de imagens por linha (--cols) muda em 3 faixas de
+   largura de tela — desktop / tablet / celular — usando os mesmos
+   pontos de corte (breakpoints) em todo o site:
+     desktop (largura > 1024px)             → 4 colunas, menu lateral normal
+     tablet  (largura entre 641px e 1024px) → 3 colunas, menu vira ícone (☰)
+     celular (largura até 640px)            → 2 colunas, menu vira ícone (☰)
+   Tablet e celular usam o MESMO comportamento de menu (MÓDULO 4B): o
+   menu lateral (MÓDULO 4) some, e no lugar aparece a barra fina do
+   topo com o ícone de 3 tracinhos, que abre o painel em tela cheia.
    ========================================================================== */
 
-/* Telas pequenas (celular/tablet estreito):
-   o menu lateral vira uma barra horizontal fina no topo da página,
-   liberando o máximo de espaço possível para o grid. */
+/* TABLET E CELULAR — abaixo de 1024px: esconde o menu lateral
+   normal, mostra a barra do topo com o ícone de menu, e o grid de
+   imagens passa a ocupar a largura inteira (já que a coluna do menu
+   lateral não existe mais nessa faixa). */
+@media (max-width: 1024px){
+  :root{ --cols:3; }
+  aside{ display:none; }
+  .mobile-topbar{ display:flex; }
+  .mobile-menu{ display:block; }
+}
+
+/* CELULAR — telas estreitas: 2 imagens por linha em vez de 3. */
 @media (max-width: 640px){
-  .layout{
-    flex-direction:column;
-  }
-  aside{
-    position:relative;
-    width:100%;
-    flex-basis:auto;
-    padding:16px 16px 12px;
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:16px;
-  }
-  .brand{ margin:0 16px 0 0; }
-  nav.top-links{
-    flex-direction:row;
-    margin-bottom:0;
-    gap:16px;
-  }
-  .section-label{ display:none; }   /* lista de projetos fica escondida no modo mobile */
-  .projects{ display:none; }
+  :root{ --cols:2; }
   main{ padding:20px 10px 40px; }
+  .mobile-topbar{ padding:16px 16px; }
 }
 
 /* Telas bem pequenas: reduz o espaço entre as imagens e o tamanho do
-   título — as 4 colunas continuam, só ficando mais estreitas. */
+   título — continua em 2 colunas (regra acima), só ficando mais estreitas. */
 @media (max-width: 420px){
   :root{ --gap:5px; }
   h1.page-title{ font-size:18px; margin-bottom:24px; letter-spacing:0.5px; }
@@ -335,6 +469,7 @@ footer.credit{
 /* Respeita usuários que pedem menos animação no sistema operacional */
 @media (prefers-reduced-motion: reduce){
   .tile .caption{ transition:none; }
+  .mobile-menu{ transition:none; }
 }
 
 </style>
@@ -346,9 +481,46 @@ footer.credit{
      Cada bloco abaixo corresponde a um módulo do CSS acima.
      ========================================================================== -->
 
+<!-- MÓDULO 4B — Barra mobile (só aparece em tablet/celular, ver MÓDULO 9) -->
+<header class="mobile-topbar">
+  <a class="brand" href="index.html">felipe lins</a>
+  <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Painel de menu em tela cheia (tablet/celular) — mesmos links do
+     menu lateral do MÓDULO 4, só que num layout diferente pra caber
+     numa tela pequena. Se editar os links do menu lateral, repita
+     aqui também (e nas outras páginas do site). -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" id="menu-close" aria-label="Fechar menu">&times;</button>
+  <nav class="mobile-menu-links">
+    <a href="about.html">About</a>
+    <a href="#contact">Contact</a>
+    <div class="mobile-menu-label">Projects</div>
+    <a href="#" class="active">organic loops</a>
+    <a href="#">neural automatas</a>
+    <a href="#">magic spells</a>
+    <a href="#">cracks</a>
+    <a href="#">synthetic sea</a>
+    <a href="#">sublimation</a>
+    <a href="#">rgb melter</a>
+    <a href="#">overflow</a>
+    <a href="#">tiny worlds</a>
+    <a href="#">liquefy</a>
+    <a href="#">circulation</a>
+    <a href="#">fluid box</a>
+    <a href="#">cosmic dew</a>
+    <a href="#">dreaming</a>
+    <a href="oceanic-feeling.html">oceanic feeling</a>
+    <a href="#">others</a>
+  </nav>
+</div>
+
 <div class="layout">
 
-  <!-- MÓDULO 4 — Menu lateral -->
+  <!-- MÓDULO 4 — Menu lateral (só aparece em telas de desktop, ver MÓDULO 9) -->
   <aside>
     <a class="brand" href="index.html">felipe lins</a>
 
@@ -395,6 +567,42 @@ footer.credit{
 
 <script>
 /* ==========================================================================
+   MÓDULO 9B — MENU MOBILE (abrir/fechar o painel de tablet/celular)
+   --------------------------------------------------------------------------
+   Controla o ícone de 3 tracinhos (MÓDULO 4B): clicar nele abre o
+   painel em tela cheia; clicar no "×" ou em qualquer link dele fecha
+   de novo. Só tem efeito visual em telas de tablet/celular (abaixo de
+   1024px) — em telas de desktop o painel fica sempre com
+   "display:none" (ver MÓDULO 9), então esse código não faz diferença lá.
+   ========================================================================== */
+(function mobileMenu(){
+  const toggleBtn = document.getElementById('menu-toggle');
+  const closeBtn  = document.getElementById('menu-close');
+  const menu      = document.getElementById('mobile-menu');
+  if (!toggleBtn || !menu) return;
+
+  function openMenu(){
+    menu.classList.add('open');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';   // trava o scroll de fundo com o painel aberto
+  }
+  function closeMenu(){
+    menu.classList.remove('open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  toggleBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', closeMenu);
+
+  // Fecha o painel automaticamente ao clicar em qualquer link dele.
+  menu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMenu);
+  });
+})();
+
+
+/* ==========================================================================
    MÓDULO 10 — DADOS DAS OBRAS (é aqui que você mexe no dia a dia)
    --------------------------------------------------------------------------
    Para colocar suas imagens, troque o valor de "url" de cada item abaixo
@@ -403,19 +611,25 @@ footer.credit{
    - Pode adicionar, remover ou reordenar itens à vontade — o grid se
      ajusta sozinho, não precisa mexer em mais nada.
    - "title" é o texto que aparece na legenda ao passar o mouse.
+   - "ratio" é OPCIONAL, só serve pra dar um "palpite" de altura antes da
+     imagem carregar (evita a página pular/reajustar depois) e pra definir
+     a altura do gradiente de fallback quando não há "url" nenhuma.
+     Formato "largura/altura", ex: "1/1" (quadrada), "3/4" (retrato),
+     "4/3" (paisagem). Se não informar, usa DEFAULT_RATIO logo abaixo.
+     Quando a imagem tem "url", a ALTURA FINAL sempre vem do arquivo
+     real (masonry de verdade) — "ratio" aqui é só cosmético/provisório.
    - Enquanto "url" estiver vazia (""), a imagem é substituída por um
-     gradiente de cor (definido em fallbackPalettes logo abaixo), só para
-     o quadro não ficar em branco.
+     gradiente de cor (definido em fallbackPalettes logo abaixo).
    ========================================================================== */
 const artworks = [
-  { title: "submerge",         url: "" },
-  { title: "gilded drift",     url: "" },
-  { title: "carmine bloom",    url: "" },
-  { title: "molten hour",      url: "" },
-  { title: "violet coil",      url: "" },
-  { title: "verdant pulse",    url: "" },
-  { title: "iridescent field", url: "" },
-  { title: "cellular red",     url: "" },
+  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif" },
+  { title: "oceanic feeling 02", url: "magic_spells/magic_spells_b.gif" },
+  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_b.gif" },
+  { title: "oceanic feeling 04", url: "magic_spells/magic_spells_c.gif" },
+  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_c.gif" },
+  { title: "oceanic feeling 06", url: "magic_spells/magic_spells_d.gif" },
+  { title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_d.gif" },
+  { title: "oceanic feeling 08", url: "oceanic_feeling/oceanic_feeling_e.gif" },
 ];
 
 /* Cores de fallback (usadas somente quando "url" está vazia acima).
@@ -431,12 +645,19 @@ const fallbackPalettes = [
   ['#210505','#e0c9a0'],
 ];
 
+/* Proporção usada quando um item não tem "url" nem "ratio" definidos. */
+const DEFAULT_RATIO = "3/4";
+
 
 /* ==========================================================================
-   MÓDULO 11 — RENDERIZAÇÃO DO GRID
+   MÓDULO 11 — RENDERIZAÇÃO DO GRID (masonry)
    --------------------------------------------------------------------------
-   Lê a lista "artworks" acima e monta um quadro (.tile) para cada item
-   dentro do grid. Normalmente não precisa mexer aqui — só no MÓDULO 10.
+   Lê a lista "artworks" acima e monta um quadro (.tile) para cada item,
+   na ordem em que aparecem no array. O CSS (MÓDULO 6, "column-count")
+   já cuida de encaixar tudo em colunas tipo Pinterest — aqui só
+   criamos os elementos, sem precisar calcular posição nem tamanho
+   de célula via JavaScript. Normalmente não precisa mexer aqui — só
+   no MÓDULO 10.
    ========================================================================== */
 (function renderArtworkGrid(){
   const grid = document.getElementById('grid');
@@ -446,17 +667,24 @@ const fallbackPalettes = [
     tile.className = 'tile';
 
     if (art.url) {
-      // Tem imagem definida: cria a tag <img> preenchendo o quadro inteiro.
+      // Tem imagem definida: cria a tag <img>. A altura do quadro
+      // acompanha a proporção real do arquivo automaticamente (ver
+      // ".tile img" no CSS: width:100%; height:auto;) — não precisa
+      // calcular nada aqui.
       const img = document.createElement('img');
       img.src = art.url;
       img.alt = art.title;
       img.loading = 'lazy';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
       tile.appendChild(img);
     } else {
-      // Sem imagem: usa um gradiente de cor como espaço reservado (fallback).
+      // Sem imagem: usa um gradiente de cor como espaço reservado
+      // (fallback), com a altura definida por "ratio" (ou o padrão).
       const [corInicial, corFinal] = fallbackPalettes[i % fallbackPalettes.length];
-      tile.style.background = `linear-gradient(155deg, ${corInicial}, ${corFinal})`;
+      const art_div = document.createElement('div');
+      art_div.className = 'art';
+      art_div.style.background = `linear-gradient(155deg, ${corInicial}, ${corFinal})`;
+      art_div.style.aspectRatio = art.ratio || DEFAULT_RATIO;
+      tile.appendChild(art_div);
     }
 
     // Legenda com o título, exibida no hover (ver .tile .caption no CSS).
