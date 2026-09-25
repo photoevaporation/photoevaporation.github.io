@@ -154,8 +154,9 @@ nav.top-links a.active{
    --------------------------------------------------------------------------
    Igual às outras páginas: em telas de tablet/celular (até 1024px, ver
    MÓDULO 9), o menu lateral (MÓDULO 4) some e no lugar aparece essa
-   barra fina no topo — nome à esquerda, ícone de 3 tracinhos (☰) à
-   direita — que abre um painel em tela cheia com About / Contact / Projects.
+   barra fina no topo — nome à esquerda, "About", "Contact" e
+   "Projects" à direita. Clicar em "Projects" abre um painel em tela
+   cheia só com a lista de projetos.
    ========================================================================== */
 .mobile-topbar{
   display:none;
@@ -171,23 +172,26 @@ nav.top-links a.active{
   margin:0;
 }
 
-.menu-toggle{
+.mobile-topbar-links{
   display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:5px;
-  width:32px;
-  height:32px;
-  padding:0;
-  border:none;
+  align-items:center;
+  gap:20px;
+}
+.mobile-topbar-links a,
+.mobile-topbar-links button{
+  font:inherit;
+  font-size:14px;
+  color:#555;
   background:none;
+  border:none;
+  padding:0;
   cursor:pointer;
 }
-.menu-toggle span{
-  display:block;
-  width:100%;
-  height:2px;
-  background:var(--ink);
+.mobile-topbar-links a.active{
+  color:var(--ink);
+}
+.mobile-topbar-links .projects-toggle[aria-expanded="true"]{
+  color:var(--ink);
 }
 
 .mobile-menu{
@@ -237,14 +241,6 @@ nav.top-links a.active{
 }
 .mobile-menu-links a.active{
   color:var(--ink);
-}
-.mobile-menu-links .mobile-menu-label{
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:.4px;
-  text-transform:uppercase;
-  color:var(--ink);
-  margin-top:12px;
 }
 
 
@@ -385,7 +381,7 @@ footer.credit{
    ========================================================================== */
 
 /* TABLET E CELULAR — abaixo de 1024px: esconde o menu lateral normal,
-   mostra a barra do topo com o ícone de menu (MÓDULO 4B). */
+   mostra a barra do topo com "About / Contact / Projects" (MÓDULO 4B). */
 @media (max-width: 1024px){
   :root{ --cols:3; }
   aside{ display:none; }
@@ -418,20 +414,19 @@ footer.credit{
 <!-- MÓDULO 4B — Barra mobile (só aparece em tablet/celular, ver MÓDULO 9) -->
 <header class="mobile-topbar">
   <a class="brand" href="index.html">felipe lins</a>
-  <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="mobile-topbar-links">
+    <a href="about.html">About</a>
+    <a href="#contact">Contact</a>
+    <button class="projects-toggle" id="menu-toggle" aria-label="Abrir lista de projetos" aria-expanded="false" aria-controls="mobile-menu">Projects</button>
+  </div>
 </header>
 
-<!-- Painel de menu em tela cheia (tablet/celular) — mesmos links do
-     menu lateral abaixo, com "oceanic feeling" marcado como ativo.
-     EDITE AQUI também se duplicar este arquivo pra outro projeto. -->
+<!-- Painel em tela cheia SÓ com a lista de projetos, com "oceanic
+     feeling" marcado como ativo. EDITE AQUI também se duplicar este
+     arquivo pra outro projeto. -->
 <div class="mobile-menu" id="mobile-menu">
   <button class="mobile-menu-close" id="menu-close" aria-label="Fechar menu">&times;</button>
   <nav class="mobile-menu-links">
-    <a href="about.html">About</a>
-    <a href="#contact">Contact</a>
-    <div class="mobile-menu-label">Projects</div>
     <a href="index.html">organic loops</a>
     <a href="index.html">neural automatas</a>
     <a href="index.html">magic spells</a>
@@ -514,7 +509,7 @@ footer.credit{
 /* ==========================================================================
    MÓDULO 9B — MENU MOBILE (abrir/fechar o painel de tablet/celular)
    --------------------------------------------------------------------------
-   Igual às outras páginas — controla o ícone de 3 tracinhos do MÓDULO 4B.
+   Igual às outras páginas — controla o botão "Projects" do MÓDULO 4B.
    ========================================================================== */
 (function mobileMenu(){
   const toggleBtn = document.getElementById('menu-toggle');
@@ -553,13 +548,14 @@ footer.credit{
    sempre vem do arquivo real (masonry de verdade).
    ========================================================================== */
 const projectImages = [
-  { title: "oceanic feeling 01", url: "oceanic_feeling/oceanic_feeling_a.gif" },
-  { title: "oceanic feeling 02", url: "oceanic_feeling/oceanic_feeling_e.gif" },
-  { title: "oceanic feeling 03", url: "oceanic_feeling/oceanic_feeling_b.gif" },
-  { title: "oceanic feeling 04", url: "oceanic_feeling/oceanic_feeling_f.gif" },
-  { title: "oceanic feeling 05", url: "oceanic_feeling/oceanic_feeling_c.gif" },
-  { title: "oceanic feeling 06", url: "oceanic_feeling/oceanic_feeling_g.gif" },
-  { title: "oceanic feeling 07", url: "oceanic_feeling/oceanic_feeling_d.gif" },
+  { title: "oceanic feeling 01", url: "" },
+  { title: "oceanic feeling 02", url: "" },
+  { title: "oceanic feeling 03", url: "" },
+  { title: "oceanic feeling 04", url: "" },
+  { title: "oceanic feeling 05", url: "" },
+  { title: "oceanic feeling 06", url: "" },
+  { title: "oceanic feeling 07", url: "" },
+  { title: "oceanic feeling 08", url: "" },
 ];
 
 /* Cores de fallback (usadas somente quando "url" está vazia acima). */
