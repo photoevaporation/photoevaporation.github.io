@@ -150,6 +150,105 @@ nav.top-links a.active{
 
 
 /* ==========================================================================
+   MÓDULO 4B — MENU MOBILE (tablet e celular)
+   --------------------------------------------------------------------------
+   Igual às outras páginas: em telas de tablet/celular (até 1024px, ver
+   MÓDULO 9), o menu lateral (MÓDULO 4) some e no lugar aparece essa
+   barra fina no topo — nome à esquerda, ícone de 3 tracinhos (☰) à
+   direita — que abre um painel em tela cheia com About / Contact / Projects.
+   ========================================================================== */
+.mobile-topbar{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 24px;
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  z-index:20;
+}
+.mobile-topbar .brand{
+  margin:0;
+}
+
+.menu-toggle{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:5px;
+  width:32px;
+  height:32px;
+  padding:0;
+  border:none;
+  background:none;
+  cursor:pointer;
+}
+.menu-toggle span{
+  display:block;
+  width:100%;
+  height:2px;
+  background:var(--ink);
+}
+
+.mobile-menu{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:30;
+  display:none;
+  overflow-y:auto;
+  transform:translateY(-12px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.mobile-menu.open{
+  opacity:1;
+  transform:translateY(0);
+  visibility:visible;
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+.mobile-menu-close{
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:36px;
+  height:36px;
+  border:none;
+  background:none;
+  font-size:26px;
+  line-height:1;
+  color:var(--ink);
+  cursor:pointer;
+}
+
+.mobile-menu-links{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:26px;
+  padding:96px 24px 60px;
+  text-align:center;
+}
+.mobile-menu-links a{
+  font-size:16px;
+  color:#7a7a7a;
+}
+.mobile-menu-links a.active{
+  color:var(--ink);
+}
+.mobile-menu-links .mobile-menu-label{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-top:12px;
+}
+
+
+/* ==========================================================================
    MÓDULO 5 — CONTEÚDO PRINCIPAL (main)
    --------------------------------------------------------------------------
    Mesmo comportamento das outras páginas: margens esquerda/direita
@@ -281,44 +380,25 @@ footer.credit{
    --------------------------------------------------------------------------
    Mesma lógica do index.html: --cols muda em 3 faixas —
      desktop (largura > 1024px)             → 4 colunas (padrão, MÓDULO 1)
-     tablet  (largura entre 641px e 1024px) → 3 colunas
-     celular (largura até 640px)            → 2 colunas
-   O menu cede espaço primeiro (já é fluido via clamp() nos módulos 4 e
-   5); dentro de cada faixa, o tamanho de cada imagem acompanha o
-   espaço que sobrar nas colunas daquela faixa.
+     tablet  (largura entre 641px e 1024px) → 3 colunas, menu vira ícone (☰)
+     celular (largura até 640px)            → 2 colunas, menu vira ícone (☰)
    ========================================================================== */
 
-/* TABLET — 3 imagens por linha. */
+/* TABLET E CELULAR — abaixo de 1024px: esconde o menu lateral normal,
+   mostra a barra do topo com o ícone de menu (MÓDULO 4B). */
 @media (max-width: 1024px){
   :root{ --cols:3; }
+  aside{ display:none; }
+  .mobile-topbar{ display:flex; }
+  .mobile-menu{ display:block; }
 }
 
-/* CELULAR — 2 imagens por linha, menu vira barra horizontal no topo. */
+/* CELULAR — 2 imagens por linha em vez de 3. */
 @media (max-width: 640px){
   :root{ --cols:2; }
-  .layout{
-    flex-direction:column;
-  }
-  aside{
-    position:relative;
-    width:100%;
-    flex-basis:auto;
-    padding:16px 16px 12px;
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:16px;
-  }
-  .brand{ margin:0 16px 0 0; }
-  nav.top-links{
-    flex-direction:row;
-    margin-bottom:0;
-    gap:16px;
-  }
-  .section-label{ display:none; }
-  .projects{ display:none; }
   main{ padding:20px 10px 40px; }
   .project-desc{ font-size:14px; margin-bottom:28px; }
+  .mobile-topbar{ padding:16px 16px; }
 }
 
 @media (max-width: 420px){
@@ -328,16 +408,55 @@ footer.credit{
 
 @media (prefers-reduced-motion: reduce){
   .tile .caption{ transition:none; }
+  .mobile-menu{ transition:none; }
 }
 
 </style>
 </head>
 <body>
 
+<!-- MÓDULO 4B — Barra mobile (só aparece em tablet/celular, ver MÓDULO 9) -->
+<header class="mobile-topbar">
+  <a class="brand" href="index.html">felipe lins</a>
+  <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Painel de menu em tela cheia (tablet/celular) — mesmos links do
+     menu lateral abaixo, com "oceanic feeling" marcado como ativo.
+     EDITE AQUI também se duplicar este arquivo pra outro projeto. -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" id="menu-close" aria-label="Fechar menu">&times;</button>
+  <nav class="mobile-menu-links">
+    <a href="about.html">About</a>
+    <a href="#contact">Contact</a>
+    <div class="mobile-menu-label">Projects</div>
+    <a href="index.html">organic loops</a>
+    <a href="index.html">neural automatas</a>
+    <a href="index.html">magic spells</a>
+    <a href="index.html">cracks</a>
+    <a href="index.html">synthetic sea</a>
+    <a href="index.html">sublimation</a>
+    <a href="index.html">rgb melter</a>
+    <a href="index.html">overflow</a>
+    <a href="index.html">tiny worlds</a>
+    <a href="index.html">liquefy</a>
+    <a href="index.html">circulation</a>
+    <a href="index.html">fluid box</a>
+    <a href="index.html">cosmic dew</a>
+    <a href="index.html">dreaming</a>
+    <!-- EDITE AQUI: este é o item ativo desta página -->
+    <a href="oceanic-feeling.html" class="active">oceanic feeling</a>
+    <a href="index.html">others</a>
+  </nav>
+</div>
+
 <div class="layout">
 
-  <!-- MÓDULO 4 — Menu lateral (igual às outras páginas, com o projeto
-       atual marcado como .active dentro de <nav class="projects">) -->
+  <!-- MÓDULO 4 — Menu lateral (só aparece em desktop, ver MÓDULO 9;
+       igual às outras páginas, com o projeto atual marcado como
+       .active dentro de <nav class="projects">) -->
   <aside>
     <a class="brand" href="index.html">felipe lins</a>
 
@@ -392,6 +511,34 @@ footer.credit{
 
 
 <script>
+/* ==========================================================================
+   MÓDULO 9B — MENU MOBILE (abrir/fechar o painel de tablet/celular)
+   --------------------------------------------------------------------------
+   Igual às outras páginas — controla o ícone de 3 tracinhos do MÓDULO 4B.
+   ========================================================================== */
+(function mobileMenu(){
+  const toggleBtn = document.getElementById('menu-toggle');
+  const closeBtn  = document.getElementById('menu-close');
+  const menu      = document.getElementById('mobile-menu');
+  if (!toggleBtn || !menu) return;
+
+  function openMenu(){
+    menu.classList.add('open');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu(){
+    menu.classList.remove('open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  toggleBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', closeMenu);
+  menu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+})();
+
+
 /* ==========================================================================
    MÓDULO 10 — IMAGENS DESTE PROJETO (EDITE AQUI)
    --------------------------------------------------------------------------
