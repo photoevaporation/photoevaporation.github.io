@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>felipe lins — about</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ==========================================================================
+   MÓDULO 1 — CONFIGURAÇÃO GERAL (variáveis)
+   --------------------------------------------------------------------------
+   Iguais às do index.html, pra manter o menu lateral idêntico nas duas
+   páginas. Se mudar aqui, lembre de mudar no index.html também (ou nas
+   duas páginas do site, se tiver mais).
+   ========================================================================== */
+:root{
+  --bg:#ffffff;
+  --ink:#111111;
+  --muted:#8a8a8a;
+  --muted-2:#b3b3b3;
+  --line:#ececec;
+  --accent:#2f6fed;
+
+  --side-w:clamp(90px, 18vw, 340px);
+
+  /* Nesta página não tem grid de imagens (--gap/--cols não são usados
+     aqui), mas mantemos as mesmas variáveis por consistência com o
+     restante do site. */
+  --gap:9px;
+  --cols:4;
+}
+
+
+/* ==========================================================================
+   MÓDULO 2 — RESET / BASE
+   ========================================================================== */
+*{
+  box-sizing:border-box;
+}
+html, body{
+  height:100%;
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Montserrat", "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+
+/* ==========================================================================
+   MÓDULO 3 — ESTRUTURA GERAL DA PÁGINA
+   ========================================================================== */
+.layout{
+  display:flex;
+  max-width:1920px;
+  margin:0 auto;
+  align-items:flex-start;
+}
+
+
+/* ==========================================================================
+   MÓDULO 4 — MENU LATERAL (sidebar)
+   --------------------------------------------------------------------------
+   IDÊNTICO ao do index.html — copiado aqui porque cada página HTML é um
+   arquivo independente (sem "includes" de verdade em um site estático
+   simples como este). Se editar o menu num arquivo, repita no outro.
+   ========================================================================== */
+aside{
+  width:var(--side-w);
+  flex:0 0 var(--side-w);
+  padding:clamp(16px, 6vw, 72px) clamp(8px, 2vw, 24px) clamp(16px, 6vw, 72px) clamp(10px, 8.5vw, 160px);
+  position:sticky;
+  top:0;
+  align-self:flex-start;
+}
+
+.brand{
+  display:block;
+  font-size:19px;
+  font-weight:400;
+  letter-spacing:0.2px;
+  margin:0 0 60px 0;
+  color:var(--ink);
+}
+
+nav.top-links{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  margin-bottom:48px;
+}
+nav.top-links a{
+  font-size:14px;
+  color:#555;
+  transition:color .15s ease;
+}
+nav.top-links a:hover{
+  color:var(--ink);
+}
+/* Link do item de menu correspondente à página atual (ver .active no HTML) */
+nav.top-links a.active{
+  color:var(--ink);
+}
+
+.section-label{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:var(--ink);
+  margin-bottom:26px;
+}
+
+.projects{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+.projects a{
+  font-size:14px;
+  color:#7a7a7a;
+  line-height:1.3;
+  transition:color .15s ease;
+  width:fit-content;
+}
+.projects a:hover{
+  color:var(--ink);
+}
+.projects a.active{
+  color:var(--ink);
+}
+
+
+/* ==========================================================================
+   MÓDULO 4B — MENU MOBILE (tablet e celular)
+   --------------------------------------------------------------------------
+   Igual ao index.html: em telas de tablet/celular (até 1024px, ver
+   MÓDULO 8/responsividade lá embaixo), o menu lateral (MÓDULO 4) some
+   e no lugar aparece essa barra fina no topo — nome à esquerda,
+   "About", "Contact" e "Projects" à direita. Clicar em "Projects"
+   abre um painel em tela cheia só com a lista de projetos.
+   ========================================================================== */
+.mobile-topbar{
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 24px;
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  z-index:20;
+}
+.mobile-topbar .brand{
+  margin:0;
+}
+
+.mobile-topbar-links{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+.mobile-topbar-links a,
+.mobile-topbar-links button{
+  font:inherit;
+  font-size:14px;
+  color:#555;
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+}
+.mobile-topbar-links a.active{
+  color:var(--ink);
+}
+.mobile-topbar-links .projects-toggle[aria-expanded="true"]{
+  color:var(--ink);
+}
+
+.mobile-menu{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:30;
+  display:none;
+  overflow-y:auto;
+  transform:translateY(-12px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.mobile-menu.open{
+  opacity:1;
+  transform:translateY(0);
+  visibility:visible;
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+.mobile-menu-close{
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:36px;
+  height:36px;
+  border:none;
+  background:none;
+  font-size:26px;
+  line-height:1;
+  color:var(--ink);
+  cursor:pointer;
+}
+
+.mobile-menu-links{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:26px;
+  padding:96px 24px 60px;
+  text-align:center;
+}
+.mobile-menu-links a{
+  font-size:16px;
+  color:#7a7a7a;
+}
+.mobile-menu-links a.active{
+  color:var(--ink);
+}
+
+
+/* ==========================================================================
+   MÓDULO 5 — CONTEÚDO PRINCIPAL (main)
+   --------------------------------------------------------------------------
+   Mesmo comportamento do index.html: as margens esquerda/direita do
+   conteúdo são independentes uma da outra, controladas pelo padding
+   do <main>.
+   ========================================================================== */
+main{
+  flex:1;
+  min-width:0;
+  padding:clamp(20px, 6vw, 80px) clamp(8px, 12vw, 240px) clamp(30px, 10vw, 140px) clamp(8px, 13vw, 280px);
+}
+
+/* Título "ABOUT" — mesmo estilo do título "ARTWORKS" no index.html */
+h1.page-title{
+  text-align:center;
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:1px;
+  margin:0 0 72px 0;
+}
+
+
+/* ==========================================================================
+   MÓDULO 6 — CONTEÚDO DA PÁGINA "ABOUT" (texto + imagem)
+   --------------------------------------------------------------------------
+   Duas colunas lado a lado: texto biográfico à esquerda, uma imagem em
+   destaque à direita. Em telas estreitas, empilha (texto em cima, imagem
+   embaixo) — ver MÓDULO 8 (responsividade).
+   ========================================================================== */
+.about-content{
+  display:flex;
+  align-items:flex-start;
+  gap:clamp(24px, 6vw, 110px);   /* espaço entre o texto e a imagem */
+}
+
+/* Coluna de texto */
+.about-text{
+  flex:1 1 0;
+  max-width:620px;         /* evita que o texto fique numa linha longa demais em telas largas */
+  padding-top:6px;
+}
+.about-text p{
+  margin:0;
+  font-size:15px;
+  line-height:1.75;
+  color:#555;
+}
+.about-text p + p{
+  margin-top:1.4em;        /* espaço entre parágrafos, caso adicione mais de um */
+}
+
+/* Coluna da imagem */
+.about-image{
+  flex:0 0 clamp(220px, 32vw, 420px);  /* largura da imagem — encolhe suavemente também */
+  aspect-ratio:1 / 0.92;               /* praticamente quadrada, como no print original */
+  border-radius:2px;
+  overflow:hidden;
+  background:#0a0a0a;   /* aparece brevemente enquanto a imagem carrega, ou se "url" ficar vazia */
+}
+.about-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+
+/* ==========================================================================
+   MÓDULO 7 — ELEMENTOS FLUTUANTES + RODAPÉ
+   ========================================================================== */
+.to-top{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  width:44px; height:44px;
+  border-radius:50%;
+  background:#f2f2f2;
+  display:flex; align-items:center; justify-content:center;
+  color:#444;
+  font-size:18px;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+footer.credit{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted-2);
+  padding:40px 0 20px;
+}
+
+
+/* ==========================================================================
+   MÓDULO 8 — RESPONSIVIDADE (telas menores)
+   --------------------------------------------------------------------------
+   Mesma lógica das outras páginas: abaixo de 1024px (tablet e celular),
+   o menu lateral vira a barra com "About / Contact / Projects" (MÓDULO 4B) em vez do
+   menu lateral fixo. Abaixo de 780px, texto e imagem da bio empilham
+   em vez de ficarem lado a lado.
+   ========================================================================== */
+
+/* TABLET E CELULAR — abaixo de 1024px: esconde o menu lateral normal,
+   mostra a barra do topo com o ícone de menu. */
+@media (max-width: 1024px){
+  aside{ display:none; }
+  .mobile-topbar{ display:flex; }
+  .mobile-menu{ display:block; }
+}
+
+@media (max-width: 780px){
+  .about-content{
+    flex-direction:column;
+  }
+  .about-image{
+    flex-basis:auto;
+    width:100%;
+    max-width:420px;
+  }
+}
+
+@media (max-width: 640px){
+  main{ padding:20px 10px 40px; }
+  .mobile-topbar{ padding:16px 16px; }
+}
+
+@media (max-width: 420px){
+  h1.page-title{ font-size:18px; margin-bottom:32px; letter-spacing:0.5px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- MÓDULO 4B — Barra mobile (só aparece em tablet/celular, ver MÓDULO 8) -->
+<header class="mobile-topbar">
+  <a class="brand" href="index.html">felipe lins</a>
+  <div class="mobile-topbar-links">
+    <a href="about.html" class="active">About</a>
+    <a href="#contact">Contact</a>
+    <button class="projects-toggle" id="menu-toggle" aria-label="Abrir lista de projetos" aria-expanded="false" aria-controls="mobile-menu">Projects</button>
+  </div>
+</header>
+
+<!-- Painel em tela cheia SÓ com a lista de projetos (About/Contact já
+     aparecem direto na barra acima). -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" id="menu-close" aria-label="Fechar menu">&times;</button>
+  <nav class="mobile-menu-links">
+    <a href="organic-loops.html">organic loops</a>
+    <a href="automata-studies.html">automata studies</a>
+    <a href="magic-spells.html">magic spells</a>
+    <a href="cracks.html">cracks</a>
+    <a href="synthetic-sea.html">synthetic sea</a>
+    <a href="rgb-melter.html">rgb melter</a>
+    <a href="circulation.html">circulation</a>
+    <a href="cosmic-dew.html">cosmic dew</a>
+    <a href="dreaming.html">dreaming</a>
+    <a href="oceanic-feeling.html">oceanic feeling</a>
+    <a href="others.html">others</a>
+  </nav>
+</div>
+
+<div class="layout">
+
+  <!-- MÓDULO 4 — Menu lateral (só aparece em desktop, ver MÓDULO 8) -->
+  <aside>
+    <a class="brand" href="index.html">felipe lins</a>
+
+    <nav class="top-links">
+      <a href="about.html" class="active">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+
+    <div class="section-label">Projects</div>
+    <nav class="projects" id="projects-nav">
+      <a href="organic-loops.html">organic loops</a>
+      <a href="automata-studies.html">automata studies</a>
+      <a href="magic-spells.html">magic spells</a>
+      <a href="cracks.html">cracks</a>
+      <a href="synthetic-sea.html">synthetic sea</a>
+      <a href="rgb-melter.html">rgb melter</a>
+      <a href="circulation.html">circulation</a>
+      <a href="cosmic-dew.html">cosmic dew</a>
+      <a href="dreaming.html">dreaming</a>
+      <a href="oceanic-feeling.html">oceanic feeling</a>
+      <a href="others.html">others</a>
+    </nav>
+  </aside>
+
+  <!-- MÓDULO 5 e 6 — Conteúdo principal: título + texto/imagem -->
+  <main>
+    <h1 class="page-title">ABOUT</h1>
+
+    <div class="about-content">
+      <div class="about-text">
+        <!-- ======================================================
+             EDITE O TEXTO DA BIO AQUI (é HTML puro, sem JavaScript).
+             Pode adicionar mais parágrafos <p>...</p> à vontade.
+             ====================================================== -->
+        <p>
+          Felipe Lins (1993) is a visual artist and creative coder.
+          Write your bio here — background, education, exhibitions,
+          influences, whatever fits the artist statement.
+        </p>
+      </div>
+
+      <div class="about-image" id="about-image">
+        <!-- preenchido via JavaScript logo abaixo (MÓDULO 9) -->
+      </div>
+    </div>
+
+    <footer class="credit">Edite o texto e a URL da imagem no &lt;script&gt; / HTML desta página.</footer>
+  </main>
+
+</div>
+
+<div class="to-top" title="voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</div>
+
+
+<script>
+/* ==========================================================================
+   MÓDULO 8B — MENU MOBILE (abrir/fechar o painel de tablet/celular)
+   --------------------------------------------------------------------------
+   Igual ao index.html — controla o botão "Projects" do MÓDULO 4B.
+   ========================================================================== */
+(function mobileMenu(){
+  const toggleBtn = document.getElementById('menu-toggle');
+  const closeBtn  = document.getElementById('menu-close');
+  const menu      = document.getElementById('mobile-menu');
+  if (!toggleBtn || !menu) return;
+
+  function openMenu(){
+    menu.classList.add('open');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu(){
+    menu.classList.remove('open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  toggleBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', closeMenu);
+  menu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+})();
+
+
+/* ==========================================================================
+   MÓDULO 9 — IMAGEM DE DESTAQUE DESTA PÁGINA
+   --------------------------------------------------------------------------
+   Troque o valor de "url" pela URL direta da sua imagem (.jpg/.png/.webp).
+   Enquanto estiver vazia (""), aparece um gradiente de cor no lugar.
+   ========================================================================== */
+const aboutImage = {
+  url: "",
+  alt: "felipe lins — retrato ou obra em destaque"
+};
+
+(function renderAboutImage(){
+  const holder = document.getElementById('about-image');
+
+  if (aboutImage.url) {
+    const img = document.createElement('img');
+    img.src = aboutImage.url;
+    img.alt = aboutImage.alt;
+    img.loading = 'lazy';
+    holder.appendChild(img);
+  } else {
+    holder.style.background = 'linear-gradient(155deg, #210a12, #e64fa0)';
+  }
+})();
+</script>
+
+</body>
+</html>
