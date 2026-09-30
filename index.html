@@ -665,8 +665,25 @@ const DEFAULT_RATIO = "3/4";
   const grid = document.getElementById('grid');
 
   artworks.forEach((art, i) => {
-    const tile = document.createElement('div');
-    tile.className = 'tile';
+    // Cada arte vira um link para a subpágina correspondente ao projeto.
+    const tileLink = document.createElement('a');
+    tileLink.className = 'tile';
+
+    const projectPages = {
+      "Automata Studies": "automata-studies.html",
+      "Circulation": "circulation.html",
+      "Cosmic Dew": "cosmic-dew.html",
+      "Cracks": "cracks.html",
+      "Dreaming": "dreaming.html",
+      "Magic Spells": "magic-spells.html",
+      "Oceanic Feeling": "oceanic-feeling.html",
+      "Organic Loops": "organic-loops.html",
+      "Others": "others.html",
+      "RGB Melter": "rgb-melter.html",
+      "Synthetic Sea": "synthetic-sea.html"
+    };
+
+    tileLink.href = projectPages[art.title] || "#";
 
     if (art.url) {
       // Tem imagem definida: cria a tag <img>. A altura do quadro
@@ -677,7 +694,7 @@ const DEFAULT_RATIO = "3/4";
       img.src = art.url;
       img.alt = art.title;
       img.loading = 'lazy';
-      tile.appendChild(img);
+      tileLink.appendChild(img);
     } else {
       // Sem imagem: usa um gradiente de cor como espaço reservado
       // (fallback), com a altura definida por "ratio" (ou o padrão).
@@ -686,16 +703,16 @@ const DEFAULT_RATIO = "3/4";
       art_div.className = 'art';
       art_div.style.background = `linear-gradient(155deg, ${corInicial}, ${corFinal})`;
       art_div.style.aspectRatio = art.ratio || DEFAULT_RATIO;
-      tile.appendChild(art_div);
+      tileLink.appendChild(art_div);
     }
 
     // Legenda com o título, exibida no hover (ver .tile .caption no CSS).
     const caption = document.createElement('div');
     caption.className = 'caption';
     caption.textContent = art.title;
-    tile.appendChild(caption);
+    tileLink.appendChild(caption);
 
-    grid.appendChild(tile);
+    grid.appendChild(tileLink);
   });
 })();
 </script>
